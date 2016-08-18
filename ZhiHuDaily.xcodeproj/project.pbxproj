@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0F41C230CA40AAC79C44277A /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5776FF4B9AAE6AD670798D29 /* Pods.framework */; };
 		860277DD1C8EB65E00448192 /* RecommenderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 860277DC1C8EB65E00448192 /* RecommenderView.m */; };
 		8602EC521C8D2EC9006CE28B /* LaunchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8602EC511C8D2EC9006CE28B /* LaunchViewController.m */; };
 		8602EC541C8D2EDD006CE28B /* LaunchStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8602EC531C8D2EDD006CE28B /* LaunchStoryboard.storyboard */; };
@@ -46,6 +45,7 @@
 		86D79CEA1C789EF30042382D /* StoryCellViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 86D79CE91C789EF30042382D /* StoryCellViewModel.m */; };
 		86FA3DCB1C637DDD00160A27 /* StoryModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 86FA3DCA1C637DDD00160A27 /* StoryModel.m */; };
 		86FA3DCE1C63821000160A27 /* HomePageViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 86FA3DCD1C63821000160A27 /* HomePageViewModel.m */; };
+		EC21855F031D41B850C96131 /* Pods_ZhiHuDaily.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 488F2C9CC11E5732F7CBD701 /* Pods_ZhiHuDaily.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +66,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		341CBFBE00F7E89CF97617A0 /* Pods-ZhiHuDaily.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZhiHuDaily.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ZhiHuDaily/Pods-ZhiHuDaily.debug.xcconfig"; sourceTree = "<group>"; };
+		488F2C9CC11E5732F7CBD701 /* Pods_ZhiHuDaily.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ZhiHuDaily.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5776FF4B9AAE6AD670798D29 /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		65A86D5109F0D4562FA660B9 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		860277DB1C8EB65E00448192 /* RecommenderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecommenderView.h; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 		86FA3DCC1C63821000160A27 /* HomePageViewModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomePageViewModel.h; sourceTree = "<group>"; };
 		86FA3DCD1C63821000160A27 /* HomePageViewModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomePageViewModel.m; sourceTree = "<group>"; };
 		C4F26D79FA2A0B8C27044790 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		F1BBC4433D5646992E9350C2 /* Pods-ZhiHuDaily.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZhiHuDaily.release.xcconfig"; path = "Pods/Target Support Files/Pods-ZhiHuDaily/Pods-ZhiHuDaily.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,7 +155,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0F41C230CA40AAC79C44277A /* Pods.framework in Frameworks */,
+				EC21855F031D41B850C96131 /* Pods_ZhiHuDaily.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,6 +180,7 @@
 			isa = PBXGroup;
 			children = (
 				5776FF4B9AAE6AD670798D29 /* Pods.framework */,
+				488F2C9CC11E5732F7CBD701 /* Pods_ZhiHuDaily.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -518,6 +522,8 @@
 			children = (
 				65A86D5109F0D4562FA660B9 /* Pods.debug.xcconfig */,
 				C4F26D79FA2A0B8C27044790 /* Pods.release.xcconfig */,
+				341CBFBE00F7E89CF97617A0 /* Pods-ZhiHuDaily.debug.xcconfig */,
+				F1BBC4433D5646992E9350C2 /* Pods-ZhiHuDaily.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -529,12 +535,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 862DD6B51C5F38B200E24C6B /* Build configuration list for PBXNativeTarget "ZhiHuDaily" */;
 			buildPhases = (
-				65D6C94EBD0E0100DDBE06C7 /* Check Pods Manifest.lock */,
+				65D6C94EBD0E0100DDBE06C7 /* [CP] Check Pods Manifest.lock */,
 				862DD6841C5F38B200E24C6B /* Sources */,
 				862DD6851C5F38B200E24C6B /* Frameworks */,
 				862DD6861C5F38B200E24C6B /* Resources */,
-				B6A79307A9A6F06DE7B8E93F /* Embed Pods Frameworks */,
-				47D8659B517A7FA3F2FAD3C5 /* Copy Pods Resources */,
+				B6A79307A9A6F06DE7B8E93F /* [CP] Embed Pods Frameworks */,
+				47D8659B517A7FA3F2FAD3C5 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -654,29 +660,29 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		47D8659B517A7FA3F2FAD3C5 /* Copy Pods Resources */ = {
+		47D8659B517A7FA3F2FAD3C5 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy Pods Resources";
+			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ZhiHuDaily/Pods-ZhiHuDaily-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		65D6C94EBD0E0100DDBE06C7 /* Check Pods Manifest.lock */ = {
+		65D6C94EBD0E0100DDBE06C7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Check Pods Manifest.lock";
+			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -684,19 +690,19 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		B6A79307A9A6F06DE7B8E93F /* Embed Pods Frameworks */ = {
+		B6A79307A9A6F06DE7B8E93F /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Embed Pods Frameworks";
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ZhiHuDaily/Pods-ZhiHuDaily-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -866,7 +872,7 @@
 		};
 		862DD6B61C5F38B200E24C6B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 65A86D5109F0D4562FA660B9 /* Pods.debug.xcconfig */;
+			baseConfigurationReference = 341CBFBE00F7E89CF97617A0 /* Pods-ZhiHuDaily.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -880,7 +886,7 @@
 		};
 		862DD6B71C5F38B200E24C6B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C4F26D79FA2A0B8C27044790 /* Pods.release.xcconfig */;
+			baseConfigurationReference = F1BBC4433D5646992E9350C2 /* Pods-ZhiHuDaily.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
