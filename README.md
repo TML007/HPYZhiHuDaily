@@ -5,7 +5,7 @@ Xcode 7.0以上
 iOS 9.0以上
 
 ## 运行效果
-![](https://github.com/hshpy/ZhiHuDaily-2.0/blob/master/zhihu.gif)
+![](https://github.com/hshpy/HPYZhiHuDaily/blob/master/zhihu.gif)
 
 ## 部分实现过程
 
