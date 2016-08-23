@@ -54,13 +54,18 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [self addChildViewController:_leftMenuViewController];
     _menuView = _leftMenuViewController.view;
-    [self.view addSubview:_menuView];
     _menuView.transform = CGAffineTransformConcat(CGAffineTransformMakeScale(LeftViewWidthScaleFromValue, LeftViewHeightScaleFromValue), CGAffineTransformMakeTranslation(LeftViewOriginXFromValue, 0));
+    [self.view addSubview:_menuView];
+    [_leftMenuViewController didMoveToParentViewController:self];
+
     
+    [self addChildViewController:_homeViewController];
     _homeView = _homeViewController.view;
     _homeView.transform = CGAffineTransformConcat(CGAffineTransformMakeScale(HomeViewWidthScaleFromValue, HomeViewHeightScaleFromValue), CGAffineTransformMakeTranslation(HomeViewOriginXFromValue, 0));
     [self.view addSubview:_homeView];
+    [_homeViewController didMoveToParentViewController:self];
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
     [self.homeView addGestureRecognizer:pan];

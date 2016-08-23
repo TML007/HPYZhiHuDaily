@@ -21,15 +21,15 @@ static const CGFloat kNavigationBarHeight = 56.f;
 
 
 
-@interface HomeViewController ()<UITableViewDataSource,UITableViewDelegate>
+@interface HomeViewController ()<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate>
 
-@property (weak,nonatomic)UIScrollView *scv;
-@property (weak,nonatomic)CarouselView *carouseView;
-@property (weak,nonatomic)CounterfeitNavBarView *navBarView;
-@property (weak,nonatomic)RefreshView *refreshView;
-@property (weak,nonatomic)UITableView *mainTableView;
+@property (strong,nonatomic)UIScrollView *mainScrollView;
+
+@property (strong,nonatomic)CarouselView *carouseView;
+@property (strong,nonatomic)CounterfeitNavBarView *navBarView;
+@property (strong,nonatomic)RefreshView *refreshView;
+@property (strong,nonatomic)UITableView *mainTableView;
 @property (strong,nonatomic)HomePageViewModel *viewModel;
-
 
 @end
 
@@ -39,6 +39,7 @@ static const CGFloat kNavigationBarHeight = 56.f;
     self = [super init];
     if (self) {
         self.viewModel = [HomePageViewModel new];
+        [self.viewModel getLatestStories];
     }
     return self;
 }
@@ -47,13 +48,11 @@ static const CGFloat kNavigationBarHeight = 56.f;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mainScrollViewToTop:) name:@"TapStatusBar" object:nil];
     [self.viewModel addObserver:self forKeyPath:@"sectionViewModels" options:NSKeyValueObservingOptionNew context:nil];
     [self.viewModel addObserver:self forKeyPath:@"top_stories" options:NSKeyValueObservingOptionNew context:nil];
-    [self.mainTableView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 - (void)removeAllObservers {
     [self.viewModel removeObserver:self forKeyPath:@"sectionViewModels"];
     [self.viewModel removeObserver:self forKeyPath:@"top_stories"];
-    [self.mainTableView removeObserver:self forKeyPath:@"contentOffset"];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
@@ -75,47 +74,11 @@ static const CGFloat kNavigationBarHeight = 56.f;
             }
         }
         if ([keyPath isEqualToString:@"top_stories"]) {
-            [self.carouseView updateSubViewsContentWithItems:self.viewModel.top_stories];
+            [self.carouseView reloadDataWithStories:self.viewModel.top_stories];
         }
         [_refreshView stopAnimation];
     }
-    
-    if ([object isEqual:self.mainTableView]) {
-        if ([keyPath isEqualToString:@"contentOffset"]) {
-            CGFloat offSetY = _mainTableView.contentOffset.y;
-            
-            if (offSetY <= 0 && offSetY >= -90.f) {
-                _scv.contentOffset = CGPointMake(0, offSetY/2);
-                [_carouseView updateSubViewsPosition:offSetY/2];
-            }else if (offSetY > 0 ){
-                _scv.contentOffset = CGPointMake(0, offSetY);
-            }else {
-                _mainTableView.contentOffset = CGPointMake(0, -90.f);
-            }
-            
-            if (offSetY <= 0) {
-                _navBarView.backgroundView.backgroundColor = [UIColor colorWithRed:60.f/255.f green:198.f/255.f blue:253.f/255.f alpha:0.f];
-            }else {
-                _navBarView.backgroundView.backgroundColor = [UIColor colorWithRed:60.f/255.f green:198.f/255.f blue:253.f/255.f alpha:offSetY/(_mainTableView.tableHeaderView.height-36.f)] ;
-            }
-            
 
-            if ( -offSetY <= 50) {
-                [_refreshView redrawFromProgress:-offSetY/45];
-            }else if (-offSetY <= 100) {
-                if (!_mainTableView.dragging) {
-                    [_refreshView startAnimation];
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                        [self.viewModel getLatestStories];
-                    });
-                }
-            }
-            
-            if (offSetY + _mainTableView.height + kMainTableViewRowHeight > _mainTableView.contentSize.height && !self.viewModel.isLoading) {
-                [self.viewModel getPreviousStories];
-            }
-        }
-    }
 }
 
 - (void)dealloc {
@@ -128,32 +91,19 @@ static const CGFloat kNavigationBarHeight = 56.f;
     // Do any additional setup after loading the view.
     [self initSubViews];
     [self configAllObservers];
-    [self.viewModel getLatestStories];
 }
 
 - (void)initSubViews{
-    _scv = ({
+    _mainScrollView = ({
         UIScrollView *view = [UIScrollView new];
         [self.view addSubview:view];
         [view mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.edges.equalTo(self.view);
+            make.top.equalTo(self.mas_topLayoutGuideBottom);
+            make.left.right.bottom.equalTo(self.view);
         }];
-        
+        view.clipsToBounds = NO;
         view;
     });
-    
-    CarouselView *cv = [[CarouselView alloc] initWithFrame:CGRectMake(0, -(kScreenWidth-220.f)/2, kScreenWidth, kScreenWidth) itemViewModels:self.viewModel.top_stories];
-    cv.tap = ^(NSIndexPath *indexPath){
-        StoryCellViewModel *vm = [self.carouseView.items objectAtIndex:indexPath.item];
-        DetailStoryViewModel *dvm = [[DetailStoryViewModel alloc] initWithStoryID:vm.storyID];
-        dvm.allStoriesID = self.viewModel.allStoriesID;
-        DetailStoryViewController *detailVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
-        detailVC.transitioningDelegate = (MainViewController *)self.view.window.rootViewController;
-        [self.view.window.rootViewController presentViewController:detailVC animated:YES completion:nil];
-    };
-    [self.scv addSubview:cv];
-    _carouseView = cv;
-    
     
     _mainTableView = ({
         UITableView *view = [UITableView new];
@@ -171,6 +121,24 @@ static const CGFloat kNavigationBarHeight = 56.f;
         view.rowHeight = kMainTableViewRowHeight;
         [view registerClass:[UITableViewCell class] forCellReuseIdentifier:@"story"];
         [view registerClass:[SectionTitleView class] forHeaderFooterViewReuseIdentifier:NSStringFromClass([SectionTitleView class])];
+        view;
+    });
+    
+    _carouseView = ({
+        CarouselView *view = [[CarouselView alloc] initWithFrame:CGRectMake(0.f, -((kScreenWidth-220.f)/2+20.f), kScreenWidth, kScreenWidth)];
+        [self.mainScrollView addSubview:view];
+        [view reloadDataWithStories:self.viewModel.top_stories];
+        view.displayHeight = 220.f;
+        view.tap = ^(NSIndexPath *indexPath){
+            NSString *storyID = _carouseView.items[indexPath.item][@"id"];
+            DetailStoryViewModel *dvm = [[DetailStoryViewModel alloc] initWithStoryID:storyID];
+            dvm.allStoriesID = self.viewModel.allStoriesID;
+            DetailStoryViewController *detailVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
+            MainViewController *mainVC = (MainViewController *)self.view.window.rootViewController;
+            [mainVC.interaction attachToViewController:detailVC];
+            detailVC.transitioningDelegate = mainVC;
+            [mainVC presentViewController:detailVC animated:YES completion:nil];
+        };
         view;
     });
     
@@ -194,14 +162,14 @@ static const CGFloat kNavigationBarHeight = 56.f;
 
 }
 
-- (void)viewDidLayoutSubviews {
-    CGFloat titleOriginY = _navBarView.titleLab.top;
-    CGFloat titleOriginX = _navBarView.titleLab.left;
-    RefreshView *rv = [[RefreshView alloc] initWithFrame:CGRectMake(titleOriginX-25, titleOriginY, 20, 20)];
-    [self.view addSubview:rv];
-    _refreshView = rv;
-}
-
+//- (void)viewDidLayoutSubviews {
+//    CGFloat titleOriginY = _navBarView.titleLab.top;
+//    CGFloat titleOriginX = _navBarView.titleLab.left;
+//    RefreshView *rv = [[RefreshView alloc] initWithFrame:CGRectMake(titleOriginX-25, titleOriginY, 20, 20)];
+//    [self.view addSubview:rv];
+//    _refreshView = rv;
+//}
+//
 - (void)mainScrollViewToTop:(NSNotification *)noti {
     [_mainTableView setContentOffset:CGPointZero animated:YES];
 }
@@ -209,6 +177,71 @@ static const CGFloat kNavigationBarHeight = 56.f;
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)updateContentOfScreenVisibleRows {
+    NSArray *indexPaths = [_mainTableView indexPathsForVisibleRows];
+    for(NSIndexPath *indexPath in indexPaths){
+        UITableViewCell *cell = [_mainTableView cellForRowAtIndexPath:indexPath];
+        StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
+        if (!vm.displayImage) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                [vm loadDisplayImage];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
+                });
+            });
+        }
+    }
+}
+
+#pragma mark - UIScrollViewDelegate
+
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    if (!decelerate) {
+        [self updateContentOfScreenVisibleRows];
+    }
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    [self updateContentOfScreenVisibleRows];
+}
+
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    CGFloat offSetY = scrollView.contentOffset.y;
+    
+    if (offSetY<=0.f&&offSetY>= -80.f) {
+        _mainScrollView.contentOffset = CGPointMake(0, offSetY/2);
+        _carouseView.displayHeight = 220.f - offSetY;
+    }else if (offSetY<-80.f) {
+        [_mainTableView setContentOffset:CGPointMake(0, -80.f)];
+    }else if (offSetY>0&&offSetY<220.f) {
+        _mainScrollView.contentOffset = CGPointMake(0, offSetY);
+    }
+
+    if (offSetY <= 0) {
+        _navBarView.backgroundView.backgroundColor = [UIColor colorWithRed:60.f/255.f green:198.f/255.f blue:253.f/255.f alpha:0.f];
+    }else {
+        _navBarView.backgroundView.backgroundColor = [UIColor colorWithRed:60.f/255.f green:198.f/255.f blue:253.f/255.f alpha:offSetY/(_mainTableView.tableHeaderView.height-36.f)] ;
+    }
+    //
+    //
+    //            if ( -offSetY <= 50) {
+    //                [_refreshView redrawFromProgress:-offSetY/45];
+    //            }else if (-offSetY <= 100) {
+    //                if (!_mainTableView.dragging) {
+    //                    [_refreshView startAnimation];
+    //                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    //                        [self.viewModel getLatestStories];
+    //                    });
+    //                }
+    //            }
+    
+    if (offSetY + _mainTableView.height + kMainTableViewRowHeight > _mainTableView.contentSize.height && !self.viewModel.isLoading) {
+        [self.viewModel getPreviousStories];
+    }
 }
 
 #pragma mark - UITableViewDataSource
@@ -229,9 +262,15 @@ static const CGFloat kNavigationBarHeight = 56.f;
     if (vm.displayImage) {
         cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
     }else{
-        cell.contentView.layer.contents = (__bridge id _Nullable)(vm.preImage.CGImage);
+        if (!tableView.dragging&&!tableView.decelerating) {
+            [vm loadDisplayImage];
+            cell.contentView.layer.contents = (__bridge id _Nullable)vm.displayImage.CGImage;
+
+        }else {
+            cell.contentView.layer.contents = (__bridge id _Nullable)(vm.preImage.CGImage);
+        }
     }
-    //cell.contentView.layer.contentsScale = [UIScreen mainScreen].scale;
+    cell.contentView.layer.contentsScale = [UIScreen mainScreen].scale;
     return cell;
 }
 
@@ -242,35 +281,13 @@ static const CGFloat kNavigationBarHeight = 56.f;
     DetailStoryViewModel *dvm = [[DetailStoryViewModel alloc] initWithStoryID:vm.storyID];
     dvm.allStoriesID = self.viewModel.allStoriesID;
     DetailStoryViewController *detailVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
-    detailVC.transitioningDelegate = (MainViewController *)self.view.window.rootViewController;
-    [self.view.window.rootViewController presentViewController:detailVC animated:YES completion:nil];
+    MainViewController *mainVC = (MainViewController *)self.view.window.rootViewController;
+    [mainVC.interaction attachToViewController:detailVC];
+    detailVC.transitioningDelegate = mainVC;
+    [mainVC presentViewController:detailVC animated:YES completion:nil];
     [self.mainTableView deselectRowAtIndexPath:indexPath animated:NO];
 }
 
-- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
-    if (!vm.displayImage){
-        NSBlockOperation *op = [vm loadDisplayImage];
-        op.completionBlock = (^{
-            dispatch_async(dispatch_get_main_queue(), ^{
-                cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
-                cell.contentView.layer.contentsScale = [UIScreen mainScreen].scale;
-            });
-        });
-        [self.viewModel.loadQueue addOperation:op];
-        self.viewModel.progress[indexPath] = op;
-    }
-}
-
-- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath NS_AVAILABLE_IOS(6_0) {
-    
-    NSBlockOperation *operation = self.viewModel.progress[indexPath];
-    if (!operation){
-        [operation cancel];
-        [self.viewModel.progress removeObjectForKey:indexPath];
-    }
-}
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
     if (section == 0) {

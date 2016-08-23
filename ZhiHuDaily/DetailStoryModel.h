@@ -15,6 +15,6 @@
 @property(strong,nonatomic)NSString *title;
 @property(strong,nonatomic)NSString *image;
 @property(strong,nonatomic)NSString *storyID;
-@property(strong,nonatomic)NSArray *css;
+//@property(strong,nonatomic)NSArray *css;
 
 @end

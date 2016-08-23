@@ -18,25 +18,20 @@
     // Override point for customization after application launch.
     
     self.window = [UIWindow new];
-    LaunchViewController *launchVC = [UIStoryboard storyboardWithName:@"LaunchStoryboard" bundle:[NSBundle mainBundle]].instantiateInitialViewController;
-    self.window.rootViewController = launchVC;
+    self.window.rootViewController = [UIStoryboard storyboardWithName:@"LaunchStoryboard" bundle:[NSBundle mainBundle]].instantiateInitialViewController;
     [self.window makeKeyAndVisible];
+    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self mainViewController];
+        HomeViewController *homeVC = [[HomeViewController alloc] init];
+        LeftMenuViewController *leftMenuVC = [[LeftMenuViewController alloc] initWithNibName:@"LeftMenuViewController" bundle:[NSBundle mainBundle]];
+        leftMenuVC.view.frame = kScreenBounds;
+        _mainViewController = [[MainViewController alloc]initWithLeftMenuViewController:leftMenuVC andHomeViewController:homeVC];
     });
     
     return YES;
 }
 
-- (MainViewController *)mainViewController {
-    if (!_mainViewController) {
-        HomeViewController *homeVC = [HomeViewController new];
-        LeftMenuViewController *leftMenuVC = [[LeftMenuViewController alloc] initWithNibName:@"LeftMenuViewController" bundle:[NSBundle mainBundle]];
-        leftMenuVC.view.frame = kScreenBounds;
-        _mainViewController = [[MainViewController alloc]initWithLeftMenuViewController:leftMenuVC andHomeViewController:homeVC];
-    }
-    return _mainViewController;
-}
+
 
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {

@@ -11,10 +11,12 @@
 
 @implementation BaseViewController
 
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor whiteColor];
+    _interaction = [PanInteractionController new];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -22,11 +24,17 @@
     // Dispose of any resources that can be recreated.
 }
 
+
+
 - (nullable id <UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presented presentingController:(UIViewController *)presenting sourceController:(UIViewController *)source {
     _animation = [HPYAnimation new];
-    _animation.animationDuration = 0.3f;
+    _animation.animationDuration = 0.5f;
     _animation.presenting = YES;
     return _animation;
+}
+
+- (nullable id <UIViewControllerInteractiveTransitioning>)interactionControllerForDismissal:(id <UIViewControllerAnimatedTransitioning>)animator {
+    return _interaction.active ? _interaction : nil;
 }
 
 - (nullable id <UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {

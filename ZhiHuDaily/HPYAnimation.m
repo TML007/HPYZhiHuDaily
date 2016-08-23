@@ -21,26 +21,22 @@
     CGRect originalFrame = fromView.frame;
     UIView *toView = [transitionContext viewForKey:UITransitionContextToViewKey];
     UIView *containerView = [transitionContext containerView];
-    UIView *snapView;
     if (_presenting) {
         toView.frame = CGRectOffset(originalFrame, screenBounds.size.width, 0);
+        [containerView addSubview:toView];
     }else {
         toView.frame = originalFrame;
-        snapView = [fromView snapshotViewAfterScreenUpdates:YES];
-        snapView.frame = originalFrame;
+        [containerView insertSubview:toView belowSubview:fromView];
     }
-    [containerView addSubview:toView];
-    [containerView addSubview:snapView];
     [UIView animateWithDuration:self.animationDuration animations:^{
         if (_presenting) {
             toView.frame = originalFrame;
         }else {
-            snapView.frame = CGRectOffset(originalFrame, screenBounds.size.width, 0);
+            fromView.frame = CGRectOffset(originalFrame, screenBounds.size.width, 0);
         }
         
     } completion:^(BOOL finished) {
-        [snapView removeFromSuperview];
-        [transitionContext completeTransition:YES];
+        [transitionContext completeTransition:!transitionContext.transitionWasCancelled];
     }];
 }
 

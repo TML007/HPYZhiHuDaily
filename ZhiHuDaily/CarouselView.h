@@ -13,11 +13,9 @@ typedef void(^tapBlock)(NSIndexPath *);
 @interface CarouselView : UIView
 
 @property (strong,nonatomic)NSArray *items;
-@property (strong,nonatomic)UICollectionView *cv;
 @property (strong,nonatomic)tapBlock tap;
+@property (assign,nonatomic)CGFloat displayHeight;
 
-- (instancetype)initWithFrame:(CGRect)frame itemViewModels:(NSArray *)itemvs;
-- (void)updateSubViewsContentWithItems:(NSArray *)itemvms;
-- (void)updateSubViewsPosition:(CGFloat)offset;
+- (void)reloadDataWithStories:(NSArray *)stories;
 
 @end

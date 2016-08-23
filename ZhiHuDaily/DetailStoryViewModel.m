@@ -26,7 +26,7 @@
 }
 
 - (NSString *)htmlStr {
-    return [NSString stringWithFormat:@"<html><head><link rel=\"stylesheet\" href=%@></head><body>%@</body></html>",_detailStory.css[0],_detailStory.body];
+    return [NSString stringWithFormat:@"<html><head><meta name='viewport' content='initial-scale=1.0' /></head><body>%@</body></html>",_detailStory.body];
 }
 
 - (NSURL *)imageURL {
@@ -57,6 +57,7 @@
 
 - (void)getPreviousStory {
     NSInteger index = [self.allStoriesID indexOfObject:self.tagStroyID];
+
     if (--index >= 0) {
         NSString* nextStoryID = [self.allStoriesID objectAtIndex:index];
         [self getStoryContentWithStoryID:nextStoryID];

@@ -7,34 +7,56 @@
 //
 
 #import "CarouselView.h"
-#import "TopStoryCell.h"
 #import "StoryCellViewModel.h"
+#import "DetailHeaderView.h"
+#import "TopStoryCollectionViewCell.h"
+
 
 @interface CarouselView()<UICollectionViewDataSource,UICollectionViewDelegate>
 
 @property(strong,nonatomic)NSTimer *timer;
 @property (strong,nonatomic)UIPageControl *pageControl;
-@property (strong,nonatomic)CoverView *cover;
+@property (strong,nonatomic)UICollectionView *collectionView;
+@property(strong,nonatomic)NSMutableDictionary *imageCached;
 
 @end
 
-
-
 @implementation CarouselView
 
-- (instancetype)initWithFrame:(CGRect)frame itemViewModels:(NSArray *)itemvs {
+- (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
+        self.imageCached = @{}.mutableCopy;
         [self initSubViews];
-        [self updateSubViewsContentWithItems:itemvs];
+        [self addObserver:self forKeyPath:@"displayHeight" options:NSKeyValueObservingOptionOld context:nil];
     }
     return self;
 }
 
+- (void)dealloc
+{
+    [self removeObserver:self forKeyPath:@"displayHeight"];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+    if ([keyPath isEqualToString:@"displayHeight"]) {
+
+        NSArray *visiblecells = [_collectionView visibleCells];
+        if (visiblecells.count>0) {
+            TopStoryCollectionViewCell *cell = [visiblecells firstObject];
+            cell.coverHeightConstraint.constant = _displayHeight;
+            [_pageControl mas_updateConstraints:^(MASConstraintMaker *make) {
+                make.bottom.equalTo(self).offset(-(self.width-_displayHeight)/2);
+            }];
+            [super updateConstraints];
+        }
+
+    }
+}
 
 - (void)initSubViews{
     
-    self.cv = ({
+    self.collectionView = ({
         UICollectionViewFlowLayout *flowlayout = [[UICollectionViewFlowLayout alloc] init];
         flowlayout.itemSize = CGSizeMake(self.width,self.height);
         flowlayout.minimumInteritemSpacing = 0.f;
@@ -42,15 +64,14 @@
         flowlayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
         
         UICollectionView *view = [[UICollectionView alloc] initWithFrame:CGRectMake(0.f, 0.f, self.width, self.height) collectionViewLayout:flowlayout];
-        view.backgroundColor = [UIColor whiteColor];
+        view.backgroundColor = [UIColor grayColor];
         view.showsHorizontalScrollIndicator = NO;
         view.showsVerticalScrollIndicator = NO;
         view.pagingEnabled = true;
         view.delegate = self;
         view.dataSource = self;
         [self addSubview:view];
-        [view registerClass:[TopStoryCell class] forCellWithReuseIdentifier:NSStringFromClass([TopStoryCell class])];
-        
+        [view registerNib:[UINib nibWithNibName:@"TopStoryCollectionViewCell" bundle:[NSBundle mainBundle]] forCellWithReuseIdentifier:@"TopStory"];
         view;
     });
     
@@ -59,7 +80,7 @@
         [self addSubview:pc];
         [pc mas_makeConstraints:^(MASConstraintMaker *make) {
             make.centerX.equalTo(self);
-            make.bottom.equalTo(self).offset(-(kScreenWidth-220)/2);
+            make.bottom.equalTo(self).offset(-(self.width-220)/2);
         }];
         pc.pageIndicatorTintColor = [UIColor grayColor];
         pc.currentPageIndicatorTintColor = [UIColor whiteColor];
@@ -67,46 +88,27 @@
     });
 }
 
-- (void)updateSubViewsPosition:(CGFloat)offset {
-    int index = _cv.contentOffset.x/kScreenWidth;
-    TopStoryCell *cell = [_cv cellForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
-    [cell.cover mas_updateConstraints:^(MASConstraintMaker *make) {
-        make.bottom.equalTo(cell.contentView).offset(-(kScreenWidth-220.f)/2-offset);
-    }];
-    
-    [_pageControl mas_updateConstraints:^(MASConstraintMaker *make) {
-        make.bottom.equalTo(self).offset(-(kScreenWidth-220)/2-offset);
-    }];
-    [super updateConstraints];
-}
-
-- (void)updateSubViewsContentWithItems:(NSArray *)itemvms {
-    if (itemvms) {
-        NSMutableArray *tmp = [NSMutableArray arrayWithArray:itemvms];
-        [tmp insertObject:[itemvms lastObject] atIndex:0];
-        [tmp addObject:[itemvms firstObject]];
+- (void)reloadDataWithStories:(NSArray *)stories {
+    if (stories.count>0) {
+        NSMutableArray *tmp = [NSMutableArray arrayWithArray:stories];
+        [tmp insertObject:[stories lastObject] atIndex:0];
+        [tmp addObject:[stories firstObject]];
         self.items = tmp;
-        [self.cv reloadData];
-        [self.cv scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:1 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
-        self.pageControl.numberOfPages = itemvms.count;
+        [self.collectionView reloadData];
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:1 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
+        self.pageControl.numberOfPages = stories.count;
         self.pageControl.currentPage = 0;
         self.timer = [NSTimer scheduledTimerWithTimeInterval:10.f target:self selector:@selector(nextItem) userInfo:nil repeats:YES];
         [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            for (StoryCellViewModel *vm in self.items) {
-                vm.displayImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:vm.topStoryImaURL]];
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.cv reloadData];
-            });
-        });
     }
 }
 
+
+
 - (void)nextItem {
-    int currentItem = self.cv.contentOffset.x/self.bounds.size.width;
+    int currentItem = self.collectionView.contentOffset.x/self.bounds.size.width;
     currentItem ++;
-    [self.cv scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:currentItem inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:YES];
+    [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:currentItem inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:YES];
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
@@ -114,14 +116,18 @@
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    TopStoryCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:NSStringFromClass([TopStoryCell class]) forIndexPath:indexPath];
-    StoryCellViewModel *vm = self.items[indexPath.item];
-    if (!vm.displayImage) {
-        cell.imageView.image = vm.preImage;
-    }else {
-        cell.imageView.image = vm.displayImage;
+    static NSString *identifier = @"TopStory";
+    TopStoryCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
+    NSDictionary *story = self.items[indexPath.item];
+    cell.titleLab.attributedText = [[NSAttributedString alloc] initWithString:story[@"title"]  attributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize:21],NSForegroundColorAttributeName:[UIColor whiteColor]}];
+    NSString *imageUrlString = story[@"image"];
+    UIImage *image = _imageCached[imageUrlString];
+    if (!image) {
+        image =[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageUrlString]]];
+        [_imageCached setObject:image forKey:imageUrlString];
     }
-    cell.titleLab.attributedText = vm.title;
+    cell.imageView.image = image;
+
     return cell;
 }
 
@@ -134,10 +140,10 @@
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
 
     if (scrollView.contentOffset.x <= self.bounds.size.width/4) {
-        [self.cv scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:(self.items.count-2) inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:(self.items.count-2) inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
     }
     else if(scrollView.contentOffset.x >= (self.items.count-5/4)*self.bounds.size.width){
-        [self.cv scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:1 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:1 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
     }
     
     _pageControl.currentPage = scrollView.contentOffset.x/self.bounds.size.width - 1;

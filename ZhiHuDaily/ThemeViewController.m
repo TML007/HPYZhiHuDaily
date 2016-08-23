@@ -14,7 +14,7 @@
 
 static const CGFloat kMainTableViewRowHeight = 95.f;
 
-@interface ThemeViewController ()<UITableViewDataSource,UITableViewDelegate>
+@interface ThemeViewController ()<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate>
 
 @property (strong,nonatomic)ThemeViewModel *viewModel;
 @property (weak,nonatomic)UIScrollView *scrollView;
@@ -120,49 +120,49 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
     
     if (vm.displayImage) {
         cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
-        cell.contentView.layer.contentsScale = [UIScreen mainScreen].scale;
     }else{
-        cell.contentView.layer.contents = (__bridge id _Nullable)(vm.preImage.CGImage);
-        cell.contentView.layer.contentsScale = [UIScreen mainScreen].scale;
+        if (!tableView.dragging&&!tableView.decelerating) {
+            [vm loadDisplayImage];
+            cell.contentView.layer.contents = (__bridge id _Nullable)vm.displayImage.CGImage;
+            
+        }else {
+            cell.contentView.layer.contents = (__bridge id _Nullable)(vm.preImage.CGImage);
+        }
     }
-    [self.mainTableView deselectRowAtIndexPath:indexPath animated:NO];
+    cell.contentView.layer.contentsScale = [UIScreen mainScreen].scale;
     
     return cell;
 }
 
-
-- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    StoryCellViewModel *vm = [self.viewModel cellViewModelAtIndexPath:indexPath];
-    if (!vm.displayImage){
-        NSBlockOperation *op = [vm loadDisplayImage];
-        op.completionBlock = (^{
-            dispatch_async(dispatch_get_main_queue(), ^{
-                cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
-                cell.contentView.layer.contentsScale = [UIScreen mainScreen].scale;
+- (void)updateContentOfScreenVisibleRows {
+    NSArray *indexPaths = [_mainTableView indexPathsForVisibleRows];
+    for(NSIndexPath *indexPath in indexPaths){
+        UITableViewCell *cell = [_mainTableView cellForRowAtIndexPath:indexPath];
+        StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
+        if (!vm.displayImage) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                [vm loadDisplayImage];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
+                });
             });
-        });
-        [self.viewModel.loadQueue addOperation:op];
-        self.viewModel.progress[indexPath] = op;
+        }
     }
 }
 
-- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath NS_AVAILABLE_IOS(6_0) {
-    
-    NSBlockOperation *operation = self.viewModel.progress[indexPath];
-    if (!operation){
-        [operation cancel];
-        [self.viewModel.progress removeObjectForKey:indexPath];
+#pragma mark - UIScrollViewDelegate
+
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    if (!decelerate) {
+        [self updateContentOfScreenVisibleRows];
     }
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    StoryCellViewModel *svm = [self.viewModel cellViewModelAtIndexPath:indexPath];
-    TDStoryViewModel *tdvm = [[TDStoryViewModel alloc] initWithStoryID:svm.storyID];
-    tdvm.allStoriesID = self.viewModel.allStoriesID;
-    TPStoryViewController *tpVC = [[TPStoryViewController alloc] initWithViewModel:tdvm];
-    [self.navigationController pushViewController:tpVC animated:YES];
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    [self updateContentOfScreenVisibleRows];
 }
+
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     CGFloat offSetY = scrollView.contentOffset.y;
@@ -178,6 +178,15 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
         }
     }
 
+}
+
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    StoryCellViewModel *svm = [self.viewModel cellViewModelAtIndexPath:indexPath];
+    TDStoryViewModel *tdvm = [[TDStoryViewModel alloc] initWithStoryID:svm.storyID];
+    tdvm.allStoriesID = self.viewModel.allStoriesID;
+    TPStoryViewController *tpVC = [[TPStoryViewController alloc] initWithViewModel:tdvm];
+    [self.navigationController pushViewController:tpVC animated:YES];
 }
 
 

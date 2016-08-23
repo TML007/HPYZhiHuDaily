@@ -43,7 +43,7 @@
         NSArray *storiesArr = jsonDic[@"stories"];
         NSMutableArray* tempArr = [NSMutableArray array];
         for (NSDictionary *dic in storiesArr) {
-            StoryCellViewModel *vm = [[StoryCellViewModel alloc] initWithDictionary:dic cellType:StoryCellTypeNormal];
+            StoryCellViewModel *vm = [[StoryCellViewModel alloc] initWithDictionary:dic];
             [tempArr addObject:vm];
         }
         [self setValue:jsonDic[@"name"] forKey:@"name"];
@@ -66,7 +66,7 @@
         NSArray *storiesArr = jsonDic[@"stories"];
         NSMutableArray* tempArr = [NSMutableArray array];
         for (NSDictionary *dic in storiesArr) {
-            StoryCellViewModel *vm = [[StoryCellViewModel alloc] initWithDictionary:dic cellType:StoryCellTypeNormal];
+            StoryCellViewModel *vm = [[StoryCellViewModel alloc] initWithDictionary:dic];
             [tempArr addObject:vm];
         }
         NSMutableArray *temp = [self mutableArrayValueForKey:@"sectionViewModels"];

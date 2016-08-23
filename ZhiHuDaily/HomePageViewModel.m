@@ -28,7 +28,7 @@
         NSArray *stories = dic[@"stories"];
         NSMutableArray *temp = [NSMutableArray new];
         for (NSDictionary *storyDic in stories) {
-            StoryCellViewModel *vm = [[StoryCellViewModel alloc] initWithDictionary:storyDic cellType:StoryCellTypeNormal];
+            StoryCellViewModel *vm = [[StoryCellViewModel alloc] initWithDictionary:storyDic];
             [temp addObject:vm];
         }
         _cellViewModels = temp;
@@ -56,7 +56,6 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _loadQueue = [[NSOperationQueue alloc] init];
         _sectionViewModels = [NSMutableArray array];
         _progress = [NSMutableDictionary dictionary];
     }
@@ -110,12 +109,7 @@
         }
         
         NSArray *topstories = jsonDic[@"top_stories"];
-        NSMutableArray *temp = [NSMutableArray new];
-        for (NSDictionary *storyDic in topstories) {
-            StoryCellViewModel *vm = [[StoryCellViewModel alloc] initWithDictionary:storyDic cellType:StoryCellTypeTopStory];
-            [temp addObject:vm];
-        }
-        [self setValue:temp forKey:@"top_stories"];
+        [self setValue:topstories forKey:@"top_stories"];
     } failure:nil];
 }
 

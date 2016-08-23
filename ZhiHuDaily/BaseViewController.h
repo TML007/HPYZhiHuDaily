@@ -8,9 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import "HPYAnimation.h"
+#import "PanInteractionController.h"
 
 @interface BaseViewController : UIViewController<UIViewControllerTransitioningDelegate>
 
 @property (strong,nonatomic)HPYAnimation *animation;
+@property (strong,nonatomic)PanInteractionController *interaction;
 
 @end

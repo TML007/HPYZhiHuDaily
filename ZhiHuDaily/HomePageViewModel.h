@@ -16,7 +16,6 @@
 @property(assign,readonly,nonatomic)BOOL isLoading;
 @property(strong,readonly,nonatomic)NSMutableArray *allStoriesID;
 @property(strong,nonatomic)NSString *currentLoadDayStr; //已加载最靠前那一天的日期字符串
-@property(strong,nonatomic)NSOperationQueue *loadQueue;
 @property (strong,nonatomic)NSMutableDictionary *progress;
 
 
