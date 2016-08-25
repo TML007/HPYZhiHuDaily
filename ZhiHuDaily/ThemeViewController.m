@@ -172,7 +172,7 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
         _mainTableView.contentOffset = CGPointMake(0, -120.f);
     }
 
-    if (offSetY + _mainTableView.height + kMainTableViewRowHeight > _mainTableView.contentSize.height ) {
+    if (offSetY + _mainTableView.height + 1.5*kMainTableViewRowHeight > _mainTableView.contentSize.height ) {
         if (!self.viewModel.isLoading) {
            [self.viewModel getMoreDailyThemesData];
         }

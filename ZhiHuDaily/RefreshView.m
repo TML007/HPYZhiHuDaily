@@ -36,7 +36,7 @@
         [self.layer addSublayer:_grayCircleLayer];
     
         _whiteCircleLayer = [[CAShapeLayer alloc] init];
-        _whiteCircleLayer.lineWidth = 2.f;
+        _whiteCircleLayer.lineWidth = 1.f;
         _whiteCircleLayer.strokeColor = [UIColor whiteColor].CGColor;
         _whiteCircleLayer.fillColor = [UIColor clearColor].CGColor;
         _whiteCircleLayer.strokeEnd = 0.f;
@@ -47,9 +47,10 @@
     return self;
 }
 
+
 - (void)redrawFromProgress:(CGFloat)progress {
-    if (!_isRefresh) {
-        if (progress > 0) {
+    if (!_refresh) {
+        if (progress > 0.05) {
             _whiteCircleLayer.opacity = 1.f;
             _grayCircleLayer.opacity = 1.f;
         }else {
@@ -57,21 +58,29 @@
             _grayCircleLayer.opacity = 0.f;
         }
         _whiteCircleLayer.strokeEnd = progress;
+    }else {
+        _whiteCircleLayer.opacity = 0.f;
+        _grayCircleLayer.opacity = 0.f;
+    }
+}
+
+- (void)setRefresh:(BOOL)refresh {
+    _refresh = refresh;
+    if (_refresh) {
+        [self startAnimation];
+    }else {
+        [self stopAnimation];
     }
 }
 
 - (void)startAnimation {
-    if (!_isRefresh) {
-        _whiteCircleLayer.opacity = 0.f;
-        _grayCircleLayer.opacity = 0.f;
-        [_indicatorView startAnimating];
-        _isRefresh = YES;
-    }
+    _whiteCircleLayer.opacity = 0.f;
+    _grayCircleLayer.opacity = 0.f;
+    [_indicatorView startAnimating];
 }
 
 - (void)stopAnimation {
     [_indicatorView stopAnimating];
-    _isRefresh = NO;
 }
 
 - (CGSize)intrinsicContentSize {

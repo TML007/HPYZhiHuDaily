@@ -29,13 +29,12 @@ static const CGFloat kNormalImageH = 75.f;
     self = [super init];
     if (self) {
         _story = [[StoryModel alloc] initWithDictionary:dic error:nil];
+        _storyID = _story.storyID;
     }
     return self;
 }
 
-- (NSString *)storyID {
-    return _story.storyID;
-}
+
 
 - (NSAttributedString *)title {
     
@@ -54,7 +53,9 @@ static const CGFloat kNormalImageH = 75.f;
         CGContextRef context = UIGraphicsGetCurrentContext();
         CGContextAddRect(context, CGRectMake(kSpacing, kSpacing, kScreenWidth-kSpacing*2, kMainTableViewRowHeight-kSpacing*2));
         CGContextClip(context);
-        [image drawInRect:self.imageViewFrame];
+        if (_story.images.count>0) {
+            [image drawInRect:self.imageViewFrame];
+        }
         [self.title drawInRect:self.titleLabFrame];
         image = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
@@ -80,10 +81,11 @@ static const CGFloat kNormalImageH = 75.f;
     image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     self.displayImage = image;
+    //self.story = nil;
 }
 
 - (CGRect)imageViewFrame {
-    return  CGRectMake(kScreenWidth-kNormalImageW-kSpacing, 10.f, kNormalImageH, kNormalImageW);
+    return _story.images.count>0?CGRectMake(kScreenWidth-kNormalImageW-kSpacing, 10.f, kNormalImageH, kNormalImageW):CGRectZero;
 }
 
 - (CGRect)titleLabFrame {

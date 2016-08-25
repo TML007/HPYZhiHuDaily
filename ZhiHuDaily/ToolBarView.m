@@ -30,6 +30,12 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
+        
+        CALayer *lineLayer = [CALayer new];
+        lineLayer.frame = CGRectMake(0.f, 0.f, self.width, 1.f);
+        lineLayer.backgroundColor = [UIColor groupTableViewBackgroundColor].CGColor;
+        [self.layer addSublayer:lineLayer];
+        
         self.backgroundColor = [UIColor whiteColor];
         HPYButton *backBtn = [[HPYButton alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth/5, 43)];
         [backBtn setTag:0];

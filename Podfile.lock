@@ -14,7 +14,7 @@ PODS:
   - AFNetworking/Serialization (3.0.4)
   - AFNetworking/UIKit (3.0.4):
     - AFNetworking/NSURLSession
-  - JSONModel (1.3.0)
+  - JSONModel (1.4.0)
   - Masonry (1.0.1)
   - ReactiveCocoa (4.2.1):
     - Result (~> 2.0)
@@ -28,11 +28,11 @@ DEPENDENCIES:
 
 SPEC CHECKSUMS:
   AFNetworking: a0075feb321559dc78d9d85b55d11caa19eabb93
-  JSONModel: 81c06ecf99190a25fa6aafceea5faffa7880868a
+  JSONModel: 58fe3f8c29ff95ed94e7ee7dde87e807f5da5371
   Masonry: a1a931a0d08870ed8ae415a2ea5ea68ebcac77df
   ReactiveCocoa: 5a42745f11ea236f405bb9ce5e97c5e3b23562dd
   Result: 18e1a7597fbcca5923c565b40a25a98afafdee02
 
-PODFILE CHECKSUM: d3058eb6bdd54bcc7baedfe447c0d5b2836a986a
+PODFILE CHECKSUM: fec17aa9837a52da688db88fe912354f67b69991
 
 COCOAPODS: 1.0.1

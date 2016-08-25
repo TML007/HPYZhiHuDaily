@@ -27,19 +27,18 @@
 
 
 - (nullable id <UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presented presentingController:(UIViewController *)presenting sourceController:(UIViewController *)source {
-    _animation = [HPYAnimation new];
-    _animation.animationDuration = 0.5f;
-    _animation.presenting = YES;
-    return _animation;
-}
-
-- (nullable id <UIViewControllerInteractiveTransitioning>)interactionControllerForDismissal:(id <UIViewControllerAnimatedTransitioning>)animator {
-    return _interaction.active ? _interaction : nil;
+    ZHPresentAnimationController *present = [ZHPresentAnimationController new];
+    present.animationDuration = 0.5;
+    return present;
 }
 
 - (nullable id <UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {
-    _animation.presenting = NO;
-    return _animation;
+    ZHDismissAnimationController *dismiss = [ZHDismissAnimationController new];
+    dismiss.animationDuration = 0.5;
+    return dismiss;
+}
+- (nullable id <UIViewControllerInteractiveTransitioning>)interactionControllerForDismissal:(id <UIViewControllerAnimatedTransitioning>)animator {
+    return _interaction.active ? _interaction : nil;
 }
 
 

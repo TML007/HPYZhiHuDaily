@@ -117,7 +117,7 @@
     
     _isLoading = YES;
     [NetOperation getRequestWithURL:[NSString stringWithFormat:@"stories/before/%@",self.currentLoadDayStr] parameters:nil success:^(id responseObject) {
-        NSDictionary *jsonDic = (NSDictionary*)responseObject;
+        NSDictionary *jsonDic = (NSDictionary *)responseObject;
         self.currentLoadDayStr = responseObject[@"date"];
         
         SectionViewModel *vm = [[SectionViewModel alloc] initWithDictionary:jsonDic];

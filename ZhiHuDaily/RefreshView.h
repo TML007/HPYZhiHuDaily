@@ -11,9 +11,8 @@
 @interface RefreshView : UIView
 
 
-@property(assign,readonly,nonatomic)BOOL isRefresh;
+@property(assign,nonatomic)BOOL refresh;
+
 - (void)redrawFromProgress:(CGFloat)progress;
-- (void)startAnimation;
-- (void)stopAnimation;
 
 @end

@@ -1,23 +1,23 @@
 # 仿写知乎日报 iOS APP
 
-## 编译环境:  
+## 编译环境:
 Xcode 7.0以上  
 iOS 9.0以上
 
+## 第三方库
+* AFNetworking
+* Masonry
+* JSONModel
+
 ## 运行效果
+
 ![](https://github.com/hshpy/HPYZhiHuDaily/blob/master/zhihu.gif)
 
 ## 部分实现过程
 
-设计模式：MVVM
+###首页
 
-***
-
-顶部的轮播视图采用最常见的做法，就是在原数组的前后再插入一个元素，例5,1,2,3,4,5,1,然后通过改变collectionview的contentoffset属性。
-
-***
-
-轮播视图里面有一层渐变图层，如果调用addSubLayer方法把CAGradientLayer的实例加入的话，当我们下拉刷新时会触发景深效果会改变图层的bounds属性(动画属性)，苹果**只对子图层的动画属性改变自动会触发隐式动画**，动画效果造成与我们下拉时不一致不协调；既然添加子图层没办法，那就往根图层想办法了，每个UIView的实例都一个CALayer的实例作为根图层，CAGradientLayer又是CALayer的子类,所以新建一个CoverView继承UIView重写下面方法，这样CoverView的实例的根图层就是渐变图层了，改变bounds也不会触发隐式动画。
+轮播视图里面有一层渐变图层，如果把CAGradientLayer的实例当做子图层加入的时，当我们下拉刷新时会触发景深效果会改变图层的bounds属性(动画属性)，动画效果造成与我们下拉时不一致不协调，苹果只对子图层的动画属性改变自动会触发隐式动画，；既然添加子图层没办法，那就往根图层想办法了，每个UIView的实例都一个CALayer的实例作为根图层，所以新建一个CoverView继承UIView重写下面方法，这样CoverView的实例的根图层就是CAGradientLayer了，改变bounds也不会触发隐式动画。
 
 	+ (Class)layerClass {
 	    return [CAGradientLayer class];
@@ -40,7 +40,15 @@ iOS 9.0以上
 
 ***
 
-因为官方后台接口给的图像大小是150*150,但是官方app的cell里面的image并非正方形，可见出经过处理的，同时cell里面的subview也不用响应事件，所以项目里的UITableViewCell都是采用直接给cell.contentView.layer.contents赋值一张画好的CGImage，快速滑动时接近60fps。
+知乎接口给的图像大小是150*150，但是官方app的cell里面的image并非正方形，同时cell里面的subview也不用响应事件，所以项目中直接使用UITableViewCell类，直接给cell.contentView.layer.contents赋值一张处理过后的CGImage，快速滑动时加载设置本地默认图的CGImage，等到停止滑动时启动异步线程获取屏幕可见cell的图片后更新cell.contentView.layer.contents的CGImage，快速滑动时接近60fps。
 
 ***
 
+###日报内容
+
+项目选择功能更加强大的WKWebView，知乎接口返回的内容是部分HtmlString，需要自己拼接成完整的HTML文档加载和Native端执行JS语句。
+
+    <meta name='viewport' content='initial-scale=1.0,user-scalable=no' />  //移动端页面缩放比例1.0，不允许用户缩放
+    <link type='text/css' rel='stylesheet' href = 'http://news-at.zhihu.com/css/news_qa.auto.css?v=4b3e3' ></link>  //插入外部CSS
+    document.getElementsByClassName('img-place-holder')[0].style.display = 'none'  //把document中的img-place-holder元素设置为不显示
+    document.body.scrollHeight  //获取document高度后设置WKWebView的高度

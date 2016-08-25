@@ -17,14 +17,14 @@
 
 @property (strong,nonatomic)DetailStoryViewModel *viewModel;
 
-@property (strong,nonatomic)UIScrollView *mainScrollView;
+@property (weak,nonatomic)UIScrollView *mainScrollView;
 @property (weak,nonatomic)DetailHeaderView *headerView;
-
 @property (weak,nonatomic)ToolBarView *toolBar;
 @property (weak,nonatomic)WKWebView *webView;
 @property (assign,nonatomic)BOOL isLightContent;//状态栏风格
+
 @property (weak,nonatomic)UIButton *previousWarnbtn;
-@property (weak,nonatomic)UIButton *nextWarnBtn;
+@property (strong,nonatomic)UIView *placeHolderView;
 
 @end
 
@@ -35,8 +35,6 @@
     if (self) {
         self.isLightContent = YES;
         self.viewModel = vm;
-        [self configAllObservers];
-        [self.viewModel getStoryContentWithStoryID:self.viewModel.tagStroyID];
     }
     return self;
 }
@@ -45,6 +43,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self initSubViews];
+    [self configAllObservers];
+    [self.viewModel getStoryContentWithStoryID:self.viewModel.tagStroyID];
 }
 
 - (void)configAllObservers {
@@ -65,6 +65,7 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     if ([keyPath isEqualToString:@"detailStory"]) {
         _webView.height = _mainScrollView.height;
+        [self.view addSubview:_placeHolderView];
         [self.webView loadHTMLString:self.viewModel.htmlStr baseURL:[[NSBundle mainBundle]bundleURL]];
         [self.headerView setHeaderContent:self.viewModel.imageURL title:self.viewModel.titleAttText imageSourceText:self.viewModel.imageSourceText];
     }
@@ -87,13 +88,16 @@
         };
         view.next = ^{
             __strong typeof(self) strongSelf = weakSelf;
+            [strongSelf.mainScrollView setContentOffset:CGPointZero animated:NO];
+            strongSelf.mainScrollView.clipsToBounds = NO;
             [strongSelf.viewModel getNextStory];
         };
         view.update = ^(NSDictionary *info){
-            UIButton *votebtn = (UIButton *)[self.toolBar viewWithTag:2];
+            __strong typeof(self) strongSelf = weakSelf;
+            UIButton *votebtn = (UIButton *)[strongSelf.toolBar viewWithTag:2];
             [votebtn setTitle:[info[@"popularity"] stringValue] forState:UIControlStateNormal];
             [votebtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-            UIButton *commentsbtn = (UIButton *)[self.toolBar viewWithTag:4];
+            UIButton *commentsbtn = (UIButton *)[strongSelf.toolBar viewWithTag:4];
             [commentsbtn setTitle:[info[@"comments"] stringValue]forState:UIControlStateNormal];
             [commentsbtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         };
@@ -118,55 +122,46 @@
     _webView = ({
         WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
         config.userContentController = [[WKUserContentController alloc] init];
-        NSString *path = [[NSBundle mainBundle] pathForResource:@"news_qa.min" ofType:@"css"];
-        //NSString *path = @"http:\/\/news-at.zhihu.com\/css\/news_qa.auto.css?v=4b3e3";
-        NSString *js = [NSString stringWithFormat:
-                        @"document.getElementsByClassName('img-place-holder')[0].style.display = 'none';\
-                        var link = document.createElement('link');\
-                        link.setAttribute('rel','stylesheet');\
-                        link.setAttribute('type','text/css');\
-                        link.setAttribute('href','%@');\
-                        document.getElementsByTagName('head')[0].appendChild(link);",path];
+//        NSString *path = [[NSBundle mainBundle] pathForResource:@"news_qa.min" ofType:@"css"];
+//        NSString *path = @"http:\/\/news-at.zhihu.com\/css\/news_qa.auto.css?v=4b3e3";
+//        NSString *js = [NSString stringWithFormat:
+//                        @"document.getElementsByClassName('img-place-holder')[0].style.display = 'none';\
+//                        var link = document.createElement('link');\
+//                        link.setAttribute('rel','stylesheet');\
+//                        link.setAttribute('type','text/css');\
+//                        link.setAttribute('href','%@');\
+//                        document.getElementsByTagName('head')[0].appendChild(link);",path];
+        NSString *js = @"document.getElementsByClassName('img-place-holder')[0].style.display = 'none'";
         WKUserScript *script = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
         [config.userContentController addUserScript:script];
         WKWebView *view = [[WKWebView alloc] initWithFrame:CGRectMake(0, 200.f, kScreenWidth, self.mainScrollView.height-200.f) configuration:config];
         [self.mainScrollView addSubview:view];
         view.navigationDelegate = self;
+        [view setBackgroundColor:[UIColor clearColor]];
         [view.scrollView setScrollEnabled:NO];
         [view.scrollView setBackgroundColor:[UIColor clearColor]];
         view;
     });
 
-//    
-//    _previousWarnbtn = ({
-//        UIButton *btn = [UIButton new];
-//        [self.view addSubview:btn];
-//        [btn mas_makeConstraints:^(MASConstraintMaker *make) {
-//            make.centerY.equalTo(self.view.mas_top).offset(-10);
-//            make.centerX.equalTo(self.view);
-//        }];
-//        btn.enabled = NO;
-//        [btn setTitle:@"载入上一篇" forState:UIControlStateNormal];
-//        [btn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-//        btn.titleLabel.font = [UIFont systemFontOfSize:12];
-//        [btn setImage:[UIImage imageNamed:@"ZHAnswerViewBackIcon"] forState:UIControlStateNormal];
-//        btn;
-//    });
-//    
-//    _nextWarnBtn = ({
-//        UIButton *btn = [UIButton new];
-//        [self.view insertSubview:btn belowSubview:self.toolBar];
-//        [btn mas_makeConstraints:^(MASConstraintMaker *make) {
-//            make.top.equalTo(self.toolBar.mas_top).offset(10);
-//            make.centerX.equalTo(self.view);
-//        }];
-//        btn.enabled = NO;
-//        [btn setTitle:@"载入下一篇" forState:UIControlStateNormal];
-//        [btn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-//        btn.titleLabel.font = [UIFont systemFontOfSize:12];
-//        [btn setImage:[UIImage imageNamed:@"ZHAnswerViewPrevIcon"] forState:UIControlStateNormal];
-//        btn;
-//    });
+    
+    _placeHolderView = [[UIView alloc] initWithFrame:CGRectMake(0, 220.f, kScreenWidth, self.view.height-220.f-43.f)];
+    _placeHolderView.backgroundColor = [UIColor whiteColor];
+    
+    
+    _previousWarnbtn = ({
+        UIButton *btn = [UIButton new];
+        [self.view addSubview:btn];
+        [btn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(self.view.mas_top).offset(-12);
+            make.centerX.equalTo(self.view);
+        }];
+        btn.enabled = NO;
+        [btn setTitle:@"载入上一篇" forState:UIControlStateNormal];
+        [btn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+        btn.titleLabel.font = [UIFont systemFontOfSize:12];
+        [btn setImage:[UIImage imageNamed:@"ZHAnswerViewBackIcon"] forState:UIControlStateNormal];
+        btn;
+    });
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
@@ -189,41 +184,24 @@
         [self setNeedsStatusBarAppearanceUpdate];
     }
     
-//    
-//    if (offSetY < 0.f && offSetY > - 90.f ) {
-//        if (offSetY > -45.f) {
-//            self.previousWarnbtn.imageView.transform = CGAffineTransformIdentity;
-//            [self.previousWarnbtn mas_updateConstraints:^(MASConstraintMaker *make) {
-//                make.centerY.equalTo(self.view.mas_top).offset(-10-offSetY);
-//            }];
-//            [super updateViewConstraints];
-//
-//        }else {
-//            self.previousWarnbtn.imageView.transform = CGAffineTransformRotate(CGAffineTransformIdentity, M_PI);
-//            if (!self.webView.scrollView.dragging&&!self.viewModel.isLoading) {
-//                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//                    [self.viewModel getPreviousStory];
-//                });
-//            }
-//        }
-//    }
-//    
-//    if (offSetY + scrollView.frame.size.height > scrollView.contentSize.height) {
-//        if (offSetY + scrollView.frame.size.height < scrollView.contentSize.height + 80.f) {
-//            self.nextWarnBtn.imageView.transform = CGAffineTransformIdentity;
-//            [self.nextWarnBtn mas_updateConstraints:^(MASConstraintMaker *make) {
-//                make.top.equalTo(self.toolBar.mas_top).offset(10-(offSetY+scrollView.frame.size.height-scrollView.contentSize.height));
-//            }];
-//            [super updateViewConstraints];
-//        }else if (offSetY + scrollView.frame.size.height < scrollView.contentSize.height + 160.f){
-//            self.nextWarnBtn.imageView.transform = CGAffineTransformRotate(CGAffineTransformIdentity, M_PI);
-//            if (!self.webView.scrollView.dragging&&!self.viewModel.isLoading) {
-//                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//                    [self.viewModel getNextStory];
-//                });
-//            }
-//        }
-//    }
+    
+    if (offSetY <= 0.f && offSetY >= -40.f ) {
+        if (offSetY > -20.f) {
+            self.previousWarnbtn.imageView.transform = CGAffineTransformIdentity;
+            [self.previousWarnbtn mas_updateConstraints:^(MASConstraintMaker *make) {
+                make.centerY.equalTo(self.view.mas_top).offset(-12-offSetY*2);
+            }];
+            [super updateViewConstraints];
+
+        }else {
+            self.previousWarnbtn.imageView.transform = CGAffineTransformRotate(CGAffineTransformIdentity, M_PI);
+            if (!self.mainScrollView.dragging&&!self.viewModel.isLoading) {
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self.viewModel getPreviousStory];
+                });
+            }
+        }
+    }
 }
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
@@ -241,6 +219,7 @@
     [webView evaluateJavaScript:@"document.body.scrollHeight"completionHandler:^(id _Nullable data, NSError * _Nullable error) {
         _webView.height = [data floatValue];
         _mainScrollView.contentSize = CGSizeMake(kScreenWidth, _webView.height+200.f);
+        [_placeHolderView removeFromSuperview];
     }];
 }
 

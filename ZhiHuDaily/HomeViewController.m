@@ -24,12 +24,13 @@ static const CGFloat kNavigationBarHeight = 56.f;
 @interface HomeViewController ()<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate>
 
 @property (strong,nonatomic)UIScrollView *mainScrollView;
-
 @property (strong,nonatomic)CarouselView *carouseView;
 @property (strong,nonatomic)CounterfeitNavBarView *navBarView;
 @property (strong,nonatomic)RefreshView *refreshView;
 @property (strong,nonatomic)UITableView *mainTableView;
 @property (strong,nonatomic)HomePageViewModel *viewModel;
+
+@property(strong,nonatomic)DetailStoryViewController *detailStoryVC;
 
 @end
 
@@ -58,7 +59,6 @@ static const CGFloat kNavigationBarHeight = 56.f;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
    
     if ([object isEqual:self.viewModel]) {
-        [_refreshView stopAnimation];
         if ([keyPath isEqualToString:@"sectionViewModels"]) {
             NSUInteger kind = [change[NSKeyValueChangeKindKey] integerValue];
             switch (kind) {
@@ -75,8 +75,8 @@ static const CGFloat kNavigationBarHeight = 56.f;
         }
         if ([keyPath isEqualToString:@"top_stories"]) {
             [self.carouseView reloadDataWithStories:self.viewModel.top_stories];
+            _refreshView.refresh = NO;
         }
-        [_refreshView stopAnimation];
     }
 
 }
@@ -92,6 +92,7 @@ static const CGFloat kNavigationBarHeight = 56.f;
     [self initSubViews];
     [self configAllObservers];
 }
+
 
 - (void)initSubViews{
     _mainScrollView = ({
@@ -130,14 +131,14 @@ static const CGFloat kNavigationBarHeight = 56.f;
         [view reloadDataWithStories:self.viewModel.top_stories];
         view.displayHeight = 220.f;
         view.tap = ^(NSIndexPath *indexPath){
-            NSString *storyID = _carouseView.items[indexPath.item][@"id"];
+            NSString *storyID = [_carouseView.items[indexPath.item][@"id"] stringValue];
             DetailStoryViewModel *dvm = [[DetailStoryViewModel alloc] initWithStoryID:storyID];
             dvm.allStoriesID = self.viewModel.allStoriesID;
-            DetailStoryViewController *detailVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
+            _detailStoryVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
             MainViewController *mainVC = (MainViewController *)self.view.window.rootViewController;
-            [mainVC.interaction attachToViewController:detailVC];
-            detailVC.transitioningDelegate = mainVC;
-            [mainVC presentViewController:detailVC animated:YES completion:nil];
+            [mainVC.interaction attachToViewController:_detailStoryVC];
+            _detailStoryVC.transitioningDelegate = mainVC;
+            [mainVC presentViewController:_detailStoryVC animated:YES completion:nil];
         };
         view;
     });
@@ -159,17 +160,20 @@ static const CGFloat kNavigationBarHeight = 56.f;
         };
         view;
     });
+    
+    _refreshView = ({
+        RefreshView *view = [[RefreshView alloc] initWithFrame:CGRectMake(0.f,0, 20.f, 20.f)];
+        [self.view addSubview:view];
+        view;
+    });
 
 }
 
-//- (void)viewDidLayoutSubviews {
-//    CGFloat titleOriginY = _navBarView.titleLab.top;
-//    CGFloat titleOriginX = _navBarView.titleLab.left;
-//    RefreshView *rv = [[RefreshView alloc] initWithFrame:CGRectMake(titleOriginX-25, titleOriginY, 20, 20)];
-//    [self.view addSubview:rv];
-//    _refreshView = rv;
-//}
-//
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    _refreshView.origin = CGPointMake(_navBarView.titleLab.left-25.f , _navBarView.titleLab.top);
+}
+
 - (void)mainScrollViewToTop:(NSNotification *)noti {
     [_mainTableView setContentOffset:CGPointZero animated:YES];
 }
@@ -226,20 +230,20 @@ static const CGFloat kNavigationBarHeight = 56.f;
     }else {
         _navBarView.backgroundView.backgroundColor = [UIColor colorWithRed:60.f/255.f green:198.f/255.f blue:253.f/255.f alpha:offSetY/(_mainTableView.tableHeaderView.height-36.f)] ;
     }
-    //
-    //
-    //            if ( -offSetY <= 50) {
-    //                [_refreshView redrawFromProgress:-offSetY/45];
-    //            }else if (-offSetY <= 100) {
-    //                if (!_mainTableView.dragging) {
-    //                    [_refreshView startAnimation];
-    //                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    //                        [self.viewModel getLatestStories];
-    //                    });
-    //                }
-    //            }
+
+
+    if ( -offSetY <= 40.f) {
+        [_refreshView redrawFromProgress:-offSetY/30.f];
+    }else if (-offSetY <= 80.f) {
+        if (!_mainTableView.dragging && !_refreshView.refresh) {
+            _refreshView.refresh = YES;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [self.viewModel getLatestStories];
+            });
+        }
+    }
     
-    if (offSetY + _mainTableView.height + kMainTableViewRowHeight > _mainTableView.contentSize.height && !self.viewModel.isLoading) {
+    if (offSetY + _mainTableView.height + 1.5*kMainTableViewRowHeight > _mainTableView.contentSize.height && !self.viewModel.isLoading) {
         [self.viewModel getPreviousStories];
     }
 }
@@ -280,11 +284,11 @@ static const CGFloat kNavigationBarHeight = 56.f;
     StoryCellViewModel *vm = [self.viewModel cellViewModelAtIndexPath:indexPath];
     DetailStoryViewModel *dvm = [[DetailStoryViewModel alloc] initWithStoryID:vm.storyID];
     dvm.allStoriesID = self.viewModel.allStoriesID;
-    DetailStoryViewController *detailVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
+    _detailStoryVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
     MainViewController *mainVC = (MainViewController *)self.view.window.rootViewController;
-    [mainVC.interaction attachToViewController:detailVC];
-    detailVC.transitioningDelegate = mainVC;
-    [mainVC presentViewController:detailVC animated:YES completion:nil];
+    [mainVC.interaction attachToViewController:_detailStoryVC];
+    _detailStoryVC.transitioningDelegate = mainVC;
+    [mainVC presentViewController:_detailStoryVC animated:YES completion:nil];
     [self.mainTableView deselectRowAtIndexPath:indexPath animated:NO];
 }
 
