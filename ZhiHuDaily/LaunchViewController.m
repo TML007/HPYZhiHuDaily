@@ -70,12 +70,13 @@
         [NetOperation getRequestWithURL:[NSString stringWithFormat:@"start-image/%ld*%ld",(long)imageWidth,(long)imageHeight] parameters:nil success:^(id responseObject) {
             NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
             NSString *urlString = responseObject[@"img"];
-            if (![urlString isEqualToString:[userDefault objectForKey:@"LaunchImageUrlString"]]) {
+            if (![urlString isEqualToString:[userDefault stringForKey:@"LaunchImageUrlString"]]) {
                 NSString *text = responseObject[@"text"];
                 NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]];
                 [userDefault setObject:text forKey:@"LaunchText"];
                 [userDefault setObject:imageData forKey:@"LaunchImageData"];
                 [userDefault setObject:urlString forKey:@"LaunchImageUrlString"];
+                
             }
         } failure:nil];
     });
