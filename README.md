@@ -11,7 +11,7 @@ iOS 9.0以上
 
 ## 运行效果
 
-![effect](http://ww3.sinaimg.cn/large/ab0ea048gw1f7ai2av8xog208w0et4r1.gif)
+![effect](https://github.com/hshpy/HPYZhiHuDaily/blob/master/effect.gif)
 
 ## 部分实现过程
 
