@@ -21,9 +21,6 @@
     if ([propertyName isEqualToString:@"images"]) {
         return YES;
     }
-    if ([propertyName isEqualToString:@"image"]) {
-        return YES;
-    }
     return NO;
 }
 

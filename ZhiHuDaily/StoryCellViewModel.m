@@ -14,87 +14,66 @@ static const CGFloat kSpacing = 18.f;
 static const CGFloat kNormalImageW = 75.f;
 static const CGFloat kNormalImageH = 75.f;
 
-@interface StoryCellViewModel()
 
-@property (strong,nonatomic)NSAttributedString *title;
-@property (strong,nonatomic)StoryModel *story;
-@property (assign,readonly,nonatomic)CGRect titleLabFrame;
-@property (assign,readonly,nonatomic)CGRect imageViewFrame;
-
-@end
-
-@implementation StoryCellViewModel 
+@implementation StoryCellViewModel {
+    CGRect imageViewFrame;
+    CGRect titleLabFrame;
+    StoryModel *story;
+    NSAttributedString *title;
+}
 
 - (instancetype)initWithDictionary:(NSDictionary *)dic{
     self = [super init];
     if (self) {
-        _story = [[StoryModel alloc] initWithDictionary:dic error:nil];
-        _storyID = _story.storyID;
+        story = [[StoryModel alloc] initWithDictionary:dic error:nil];
+        _storyID = story.storyID;
+        imageViewFrame = story.images.count>0?CGRectMake(kScreenWidth-kNormalImageW-kSpacing, 10.f, kNormalImageH, kNormalImageW):CGRectZero;
+        title =[[NSAttributedString alloc] initWithString:story.title attributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize:15],NSForegroundColorAttributeName:[UIColor blackColor]}];
+        CGFloat width = story.images.count>0?(kScreenWidth - kSpacing*3 - kNormalImageW):(kScreenWidth - kSpacing*2);
+        CGFloat height = [title boundingRectWithSize:CGSizeMake(width, kMainTableViewRowHeight - kSpacing*2) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size.height;
+        titleLabFrame = CGRectMake(kSpacing, kSpacing, width, height);
     }
     return self;
 }
 
-
-
-- (NSAttributedString *)title {
-    
-    if (!_title) {
-        _title = [[NSAttributedString alloc] initWithString:_story.title attributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize:15],NSForegroundColorAttributeName:[UIColor blackColor]}];
-    }
-    
-    return _title;
-}
-
 - (UIImage *)preImage {
+    
     if (!_preImage) {
-        UIImage* image;
-        image = [UIImage imageNamed:@"Image_Preview"];
+        UIImage *image = [UIImage imageNamed:@"Image_Preview"];
         UIGraphicsBeginImageContextWithOptions(CGSizeMake(kScreenWidth, kMainTableViewRowHeight), NO, 0);
         CGContextRef context = UIGraphicsGetCurrentContext();
         CGContextAddRect(context, CGRectMake(kSpacing, kSpacing, kScreenWidth-kSpacing*2, kMainTableViewRowHeight-kSpacing*2));
         CGContextClip(context);
-        if (_story.images.count>0) {
-            [image drawInRect:self.imageViewFrame];
+        if (story.images.count>0) {
+            [image drawInRect:imageViewFrame];
         }
-        [self.title drawInRect:self.titleLabFrame];
-        image = UIGraphicsGetImageFromCurrentImageContext();
+        [title drawInRect:titleLabFrame];
+        _preImage  = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
-        _preImage = image;
     }
     
     return _preImage;
 }
 
 - (void)loadDisplayImage {
-    
-    UIImage* image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:self.story.images[0]]]];
+    UIImage* image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:story.images[0]]]];
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(kScreenWidth, kMainTableViewRowHeight), NO, 0);
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextAddRect(context, CGRectMake(kSpacing, kSpacing, kScreenWidth-kSpacing*2, kMainTableViewRowHeight-kSpacing*2));
     CGContextClip(context);
     [self.preImage drawInRect:CGRectMake(0, 0, kScreenWidth, kMainTableViewRowHeight)];
-    [image drawInRect:self.imageViewFrame];
-    if (self.story.multipic) {
+    [image drawInRect:imageViewFrame];
+    if (story.multipic) {
         UIImage *warnImage = [UIImage imageNamed:@"Home_Morepic"];
         [warnImage drawInRect:CGRectMake(kScreenWidth-warnImage.size.width-kSpacing, kMainTableViewRowHeight-kSpacing-warnImage.size.height, warnImage.size.width, warnImage.size.height)];
     }
-    image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    self.displayImage = image;
-    //self.story = nil;
+    _displayImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();    
 }
 
-- (CGRect)imageViewFrame {
-    return _story.images.count>0?CGRectMake(kScreenWidth-kNormalImageW-kSpacing, 10.f, kNormalImageH, kNormalImageW):CGRectZero;
-}
-
-- (CGRect)titleLabFrame {
-    CGRect frame;
-    CGFloat width = CGRectEqualToRect(self.imageViewFrame, CGRectZero) ? (kScreenWidth - kSpacing*2) : (kScreenWidth - kSpacing*3 - kNormalImageW);
-    CGFloat height = [self.title boundingRectWithSize:CGSizeMake(width, kMainTableViewRowHeight - kSpacing*2) options:NSStringDrawingUsesFontLeading|NSStringDrawingUsesLineFragmentOrigin context:nil].size.height;
-    frame = CGRectMake(kSpacing, kSpacing, width, height);
-    return frame;
-
+- (void)relesaeInvalidObjects {
+    _preImage = nil;
+    story = nil;
 }
 
 @end

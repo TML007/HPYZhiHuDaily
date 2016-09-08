@@ -15,8 +15,7 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
-    
+ 
     self.window = [UIWindow new];
     self.window.rootViewController = [UIStoryboard storyboardWithName:@"LaunchStoryboard" bundle:[NSBundle mainBundle]].instantiateInitialViewController;
     [self.window makeKeyAndVisible];
@@ -28,10 +27,9 @@
         _mainViewController = [[MainViewController alloc]initWithLeftMenuViewController:leftMenuVC andHomeViewController:homeVC];
     });
     
+    
     return YES;
 }
-
-
 
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {

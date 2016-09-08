@@ -18,8 +18,6 @@
 @property(strong,nonatomic)NSString *currentLoadDayStr; //已加载最靠前那一天的日期字符串
 @property (strong,nonatomic)NSMutableDictionary *progress;
 
-
-
 - (NSUInteger)numberOfSections;
 - (NSUInteger)numberOfRowsInSection:(NSUInteger)section;
 - (NSAttributedString *)titleForSection:(NSInteger)section;

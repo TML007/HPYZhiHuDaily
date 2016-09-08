@@ -15,9 +15,8 @@
 @property (strong,nonatomic)UIImage *preImage;
 @property (strong,nonatomic)UIImage *displayImage;
 
-
-
 - (instancetype)initWithDictionary:(NSDictionary *)dic;
 - (void)loadDisplayImage;
+- (void)relesaeInvalidObjects;
 
 @end

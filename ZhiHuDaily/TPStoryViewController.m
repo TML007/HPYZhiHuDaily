@@ -13,10 +13,10 @@
 
 @interface TPStoryViewController ()<UIScrollViewDelegate>
 
-@property (weak,nonatomic)UIWebView *webView;
-@property (weak,nonatomic)ToolBarView *toolBar;
-@property (weak,nonatomic)UIButton *previousWarnbtn;
-@property (weak,nonatomic)UIButton *nextWarnBtn;
+@property (strong,nonatomic)UIWebView *webView;
+@property (strong,nonatomic)ToolBarView *toolBar;
+@property (strong,nonatomic)UIButton *previousWarnbtn;
+@property (strong,nonatomic)UIButton *nextWarnBtn;
 
 @property (strong,nonatomic)TDStoryViewModel *viewModel;
 

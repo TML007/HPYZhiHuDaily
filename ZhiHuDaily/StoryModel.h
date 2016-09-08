@@ -12,9 +12,7 @@
 
 @property (strong,nonatomic)NSString *title;
 @property (strong,nonatomic)NSArray *images;
-//@property (assign,nonatomic)NSInteger type;
 @property (strong,nonatomic)NSString *storyID;
 @property (assign,nonatomic)BOOL multipic;
-@property (strong,nonatomic)NSURL *image;
 
 @end

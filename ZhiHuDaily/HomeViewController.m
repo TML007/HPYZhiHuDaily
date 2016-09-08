@@ -30,8 +30,6 @@ static const CGFloat kNavigationBarHeight = 56.f;
 @property (strong,nonatomic)UITableView *mainTableView;
 @property (strong,nonatomic)HomePageViewModel *viewModel;
 
-@property(strong,nonatomic)DetailStoryViewController *detailStoryVC;
-
 @end
 
 @implementation HomeViewController
@@ -75,7 +73,6 @@ static const CGFloat kNavigationBarHeight = 56.f;
         }
         if ([keyPath isEqualToString:@"top_stories"]) {
             [self.carouseView reloadDataWithStories:self.viewModel.top_stories];
-            _refreshView.refresh = NO;
         }
     }
 
@@ -134,11 +131,11 @@ static const CGFloat kNavigationBarHeight = 56.f;
             NSString *storyID = [_carouseView.items[indexPath.item][@"id"] stringValue];
             DetailStoryViewModel *dvm = [[DetailStoryViewModel alloc] initWithStoryID:storyID];
             dvm.allStoriesID = self.viewModel.allStoriesID;
-            _detailStoryVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
+            DetailStoryViewController *detailStoryVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
             MainViewController *mainVC = (MainViewController *)self.view.window.rootViewController;
-            [mainVC.interaction attachToViewController:_detailStoryVC];
-            _detailStoryVC.transitioningDelegate = mainVC;
-            [mainVC presentViewController:_detailStoryVC animated:YES completion:nil];
+            [mainVC.interaction attachToViewController:detailStoryVC];
+            detailStoryVC.transitioningDelegate = mainVC;
+            [mainVC presentViewController:detailStoryVC animated:YES completion:nil];
         };
         view;
     });
@@ -169,13 +166,13 @@ static const CGFloat kNavigationBarHeight = 56.f;
 
 }
 
-- (void)viewDidLayoutSubviews {
-    [super viewDidLayoutSubviews];
-    _refreshView.origin = CGPointMake(_navBarView.titleLab.left-25.f , _navBarView.titleLab.top);
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+     _refreshView.origin = CGPointMake(_navBarView.titleLab.left-25.f , _navBarView.titleLab.top);
 }
 
 - (void)mainScrollViewToTop:(NSNotification *)noti {
-    [_mainTableView setContentOffset:CGPointZero animated:YES];
+    [_mainTableView setContentOffset:CGPointZero animated:NO];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -192,7 +189,8 @@ static const CGFloat kNavigationBarHeight = 56.f;
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 [vm loadDisplayImage];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
+                    cell.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
+                    [vm relesaeInvalidObjects];
                 });
             });
         }
@@ -237,8 +235,9 @@ static const CGFloat kNavigationBarHeight = 56.f;
     }else if (-offSetY <= 80.f) {
         if (!_mainTableView.dragging && !_refreshView.refresh) {
             _refreshView.refresh = YES;
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [self.viewModel getLatestStories];
+                _refreshView.refresh = NO;
             });
         }
     }
@@ -258,23 +257,23 @@ static const CGFloat kNavigationBarHeight = 56.f;
     return [self.viewModel numberOfRowsInSection:section];
 }
 
-
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"story"];
     StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
-    
     if (vm.displayImage) {
-        cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
+        cell.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
     }else{
         if (!tableView.dragging&&!tableView.decelerating) {
             [vm loadDisplayImage];
-            cell.contentView.layer.contents = (__bridge id _Nullable)vm.displayImage.CGImage;
+            cell.layer.contents = (__bridge id _Nullable)vm.displayImage.CGImage;
+            [vm relesaeInvalidObjects];
 
         }else {
-            cell.contentView.layer.contents = (__bridge id _Nullable)(vm.preImage.CGImage);
+            cell.layer.contents = (__bridge id _Nullable)(vm.preImage.CGImage);
         }
     }
-    cell.contentView.layer.contentsScale = [UIScreen mainScreen].scale;
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.layer.contentsScale = [UIScreen mainScreen].scale;
     return cell;
 }
 
@@ -284,11 +283,11 @@ static const CGFloat kNavigationBarHeight = 56.f;
     StoryCellViewModel *vm = [self.viewModel cellViewModelAtIndexPath:indexPath];
     DetailStoryViewModel *dvm = [[DetailStoryViewModel alloc] initWithStoryID:vm.storyID];
     dvm.allStoriesID = self.viewModel.allStoriesID;
-    _detailStoryVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
+    DetailStoryViewController *detailStoryVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
     MainViewController *mainVC = (MainViewController *)self.view.window.rootViewController;
-    [mainVC.interaction attachToViewController:_detailStoryVC];
-    _detailStoryVC.transitioningDelegate = mainVC;
-    [mainVC presentViewController:_detailStoryVC animated:YES completion:nil];
+    [mainVC.interaction attachToViewController:detailStoryVC];
+    detailStoryVC.transitioningDelegate = mainVC;
+    [mainVC presentViewController:detailStoryVC animated:YES completion:nil];
     [self.mainTableView deselectRowAtIndexPath:indexPath animated:NO];
 }
 

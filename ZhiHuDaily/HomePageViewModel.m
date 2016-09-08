@@ -51,7 +51,9 @@
 @end
 
 
-@implementation HomePageViewModel
+@implementation HomePageViewModel {
+    NSString *lastestResquestEtag;
+}
 
 - (instancetype)init {
     self = [super init];
@@ -84,33 +86,44 @@
 
 //获取最新的新闻
 - (void)getLatestStories {
-    [NetOperation getRequestWithURL:@"stories/latest" parameters:nil success:^(id responseObject) {
 
-        NSDictionary *jsonDic = (NSDictionary*)responseObject;
-        self.currentLoadDayStr = responseObject[@"date"];
-        
-        SectionViewModel *vm = [[SectionViewModel alloc] initWithDictionary:jsonDic];
-        if (self.sectionViewModels.count == 0){
-            NSMutableArray *secvms = [NSMutableArray arrayWithObject:vm];
-            [self setValue:secvms forKey:@"sectionViewModels"];
-            _allStoriesID = [NSMutableArray arrayWithArray:[vm valueForKeyPath:@"cellViewModels.storyID"]];
-        }else {
-            NSMutableArray *temp = [self mutableArrayValueForKey:@"sectionViewModels"];
-            SectionViewModel *old = [temp objectAtIndex:0];
-            SectionViewModel *new = vm;
-            if (old.cellViewModels.count < new.cellViewModels.count) {
-                [temp replaceObjectAtIndex:0 withObject:new];
-                NSUInteger addNum = new.cellViewModels.count - old.cellViewModels.count;
-                for (NSUInteger i = addNum ; i > 0; i--){
-                    StoryCellViewModel *svm = new.cellViewModels[i-1];
-                    [_allStoriesID insertObject:svm.storyID atIndex:0];
+    NSString *urlStr = [kBaseURL stringByAppendingString:@"/stories/latest"];
+    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlStr]
+                                                    cachePolicy: NSURLRequestReloadIgnoringCacheData
+                                                    timeoutInterval:30.f];
+    if (lastestResquestEtag.length > 0) {
+        [req setValue:lastestResquestEtag forHTTPHeaderField:@"If-None-Match"];
+    }
+    NSURLSessionTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+        if (httpResponse.statusCode == 200) {
+            NSDictionary *jsonDic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+            self.currentLoadDayStr = jsonDic[@"date"];
+            SectionViewModel *vm = [[SectionViewModel alloc] initWithDictionary:jsonDic];
+            if (self.sectionViewModels.count == 0){
+                NSMutableArray *secvms = [NSMutableArray arrayWithObject:vm];
+                [self setValue:secvms forKey:@"sectionViewModels"];
+                _allStoriesID = [NSMutableArray arrayWithArray:[vm valueForKeyPath:@"cellViewModels.storyID"]];
+            }else {
+                NSMutableArray *temp = [self mutableArrayValueForKey:@"sectionViewModels"];
+                SectionViewModel *old = [temp objectAtIndex:0];
+                SectionViewModel *new = vm;
+                if (old.cellViewModels.count < new.cellViewModels.count) {
+                    [temp replaceObjectAtIndex:0 withObject:new];
+                    NSUInteger addNum = new.cellViewModels.count - old.cellViewModels.count;
+                    for (NSUInteger i = addNum ; i > 0; i--){
+                        StoryCellViewModel *svm = new.cellViewModels[i-1];
+                        [_allStoriesID insertObject:svm.storyID atIndex:0];
+                    }
                 }
             }
+            
+            NSArray *topstories = jsonDic[@"top_stories"];
+            [self setValue:topstories forKey:@"top_stories"];
         }
-        
-        NSArray *topstories = jsonDic[@"top_stories"];
-        [self setValue:topstories forKey:@"top_stories"];
-    } failure:nil];
+        lastestResquestEtag = httpResponse.allHeaderFields[@"Etag"];
+    }];
+    [task resume];
 }
 
 - (void)getPreviousStories {

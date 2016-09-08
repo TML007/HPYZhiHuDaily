@@ -17,9 +17,9 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
 @interface ThemeViewController ()<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate>
 
 @property (strong,nonatomic)ThemeViewModel *viewModel;
-@property (weak,nonatomic)UIScrollView *scrollView;
-@property (weak,nonatomic)UIImageView *imageView;
-@property (weak,nonatomic)UITableView *mainTableView;
+@property (strong,nonatomic)UIScrollView *scrollView;
+@property (strong,nonatomic)UIImageView *imageView;
+@property (strong,nonatomic)UITableView *mainTableView;
 
 @end
 

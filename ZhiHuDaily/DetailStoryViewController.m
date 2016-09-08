@@ -17,13 +17,13 @@
 
 @property (strong,nonatomic)DetailStoryViewModel *viewModel;
 
-@property (weak,nonatomic)UIScrollView *mainScrollView;
-@property (weak,nonatomic)DetailHeaderView *headerView;
-@property (weak,nonatomic)ToolBarView *toolBar;
-@property (weak,nonatomic)WKWebView *webView;
+@property (strong,nonatomic)UIScrollView *mainScrollView;
+@property (strong,nonatomic)DetailHeaderView *headerView;
+@property (strong,nonatomic)ToolBarView *toolBar;
+@property (strong,nonatomic)WKWebView *webView;
 @property (assign,nonatomic)BOOL isLightContent;//状态栏风格
 
-@property (weak,nonatomic)UIButton *previousWarnbtn;
+@property (strong,nonatomic)UIButton *previousWarnbtn;
 @property (strong,nonatomic)UIView *placeHolderView;
 
 @end
@@ -75,6 +75,8 @@
     }
 
 }
+
+
 
 - (void)initSubViews {
     
