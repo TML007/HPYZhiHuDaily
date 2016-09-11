@@ -72,6 +72,11 @@
         NSMutableArray *temp = [self mutableArrayValueForKey:@"sectionViewModels"];
         [temp addObject:tempArr];
         [_allStoriesID addObjectsFromArray:[tempArr valueForKeyPath:@"storyID"]];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            for (StoryCellViewModel *vm in tempArr){
+                [vm dowmloadImage];
+            }
+        });
         _isLoading = NO;
     } failure:^(NSError *error) {
         _isLoading = NO;

@@ -14,9 +14,12 @@
 @property (strong,readonly,nonatomic)NSString *storyID;
 @property (strong,nonatomic)UIImage *preImage;
 @property (strong,nonatomic)UIImage *displayImage;
+@property (assign,nonatomic)BOOL visiable;
 
 - (instancetype)initWithDictionary:(NSDictionary *)dic;
-- (void)loadDisplayImage;
 - (void)relesaeInvalidObjects;
+
+- (void)dowmloadImage;
+
 
 @end

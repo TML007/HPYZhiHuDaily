@@ -10,8 +10,8 @@
 
 @implementation CounterfeitNavBarView
 
-- (instancetype)init {
-    self = [super init];
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = [UIColor clearColor];
         
@@ -47,10 +47,12 @@
             }];
             [btn addTarget:self action:@selector(tapLeftBtn:) forControlEvents:UIControlEventTouchUpInside];
             btn;
-        });        
+        });
     }
     return self;
 }
+
+
 
 - (void)tapLeftBtn:(id)sender {
     if (_leftBtnTapAction) {
@@ -58,8 +60,5 @@
     }
 }
 
-- (void)dealloc {
-
-}
 
 @end

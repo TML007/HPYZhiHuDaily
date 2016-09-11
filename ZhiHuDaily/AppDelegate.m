@@ -11,24 +11,26 @@
 #import "HomeViewController.h"
 #import "LeftMenuViewController.h"
 
-@implementation AppDelegate
 
+@implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
  
-    self.window = [UIWindow new];
+    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [UIStoryboard storyboardWithName:@"LaunchStoryboard" bundle:[NSBundle mainBundle]].instantiateInitialViewController;
+    [self initMainViewController];
     [self.window makeKeyAndVisible];
-    
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        HomeViewController *homeVC = [[HomeViewController alloc] init];
-        LeftMenuViewController *leftMenuVC = [[LeftMenuViewController alloc] initWithNibName:@"LeftMenuViewController" bundle:[NSBundle mainBundle]];
-        leftMenuVC.view.frame = kScreenBounds;
-        _mainViewController = [[MainViewController alloc]initWithLeftMenuViewController:leftMenuVC andHomeViewController:homeVC];
-    });
-    
-    
+
     return YES;
+}
+
+- (void)initMainViewController {
+    HomePageViewModel *viewModel = [[HomePageViewModel alloc] init];
+    [viewModel getLatestStories];
+    HomeViewController *homeVC = [[HomeViewController alloc] initWithHomePageViewModel:viewModel];
+    LeftMenuViewController *leftMenuVC = [[LeftMenuViewController alloc] initWithNibName:@"LeftMenuViewController" bundle:[NSBundle mainBundle]];
+    leftMenuVC.view.frame = kScreenBounds;
+    _mainViewController = [[MainViewController alloc]initWithLeftMenuViewController:leftMenuVC andHomeViewController:homeVC];
 }
 
 

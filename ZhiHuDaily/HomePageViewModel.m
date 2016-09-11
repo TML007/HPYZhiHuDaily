@@ -53,13 +53,15 @@
 
 @implementation HomePageViewModel {
     NSString *lastestResquestEtag;
+    dispatch_queue_t composite_Queue;
 }
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _sectionViewModels = [NSMutableArray array];
-        _progress = [NSMutableDictionary dictionary];
+        _sectionViewModels = @[].mutableCopy;
+        _top_stories = @[].mutableCopy;
+        composite_Queue = dispatch_queue_create("composite_Queue", DISPATCH_QUEUE_SERIAL);
     }
     return self;
 }
@@ -87,8 +89,8 @@
 //获取最新的新闻
 - (void)getLatestStories {
 
-    NSString *urlStr = [kBaseURL stringByAppendingString:@"/stories/latest"];
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlStr]
+    NSString *url = [kBaseURL stringByAppendingString:@"/stories/latest"];
+    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]
                                                     cachePolicy: NSURLRequestReloadIgnoringCacheData
                                                     timeoutInterval:30.f];
     if (lastestResquestEtag.length > 0) {
@@ -137,6 +139,13 @@
         NSMutableArray *temp = [self mutableArrayValueForKey:@"sectionViewModels"];
         [temp addObject:vm];
         [_allStoriesID addObjectsFromArray:[vm valueForKeyPath:@"cellViewModels.storyID"]];
+        
+        dispatch_async(composite_Queue, ^{
+            for (StoryCellViewModel *svm in vm.cellViewModels) {
+                [svm dowmloadImage];
+            }
+        });
+        
         _isLoading = NO;
     } failure:^(NSError *error) {
         _isLoading = NO;

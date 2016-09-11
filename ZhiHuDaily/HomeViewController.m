@@ -7,7 +7,6 @@
 //
 
 #import "HomeViewController.h"
-#import "HomePageViewModel.h"
 #import "UITableView+Extension.h"
 #import "CarouselView.h"
 #import "CounterfeitNavBarView.h"
@@ -34,11 +33,12 @@ static const CGFloat kNavigationBarHeight = 56.f;
 
 @implementation HomeViewController
 
-- (instancetype)init {
+- (instancetype)initWithHomePageViewModel:(HomePageViewModel *)viewmodel {
     self = [super init];
     if (self) {
-        self.viewModel = [HomePageViewModel new];
-        [self.viewModel getLatestStories];
+        self.viewModel = viewmodel;
+        [self initSubViews];
+        [self configAllObservers];
     }
     return self;
 }
@@ -72,10 +72,11 @@ static const CGFloat kNavigationBarHeight = 56.f;
             }
         }
         if ([keyPath isEqualToString:@"top_stories"]) {
-            [self.carouseView reloadDataWithStories:self.viewModel.top_stories];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.carouseView setStroies:self.viewModel.top_stories];
+            });
         }
     }
-
 }
 
 - (void)dealloc {
@@ -86,34 +87,24 @@ static const CGFloat kNavigationBarHeight = 56.f;
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [self initSubViews];
-    [self configAllObservers];
 }
 
 
 - (void)initSubViews{
     _mainScrollView = ({
-        UIScrollView *view = [UIScrollView new];
+        UIScrollView *view = [[UIScrollView alloc] initWithFrame:CGRectMake(0.f, 20.f, kScreenWidth, kScreenHeight-20.f)];
         [self.view addSubview:view];
-        [view mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.top.equalTo(self.mas_topLayoutGuideBottom);
-            make.left.right.bottom.equalTo(self.view);
-        }];
         view.clipsToBounds = NO;
         view;
     });
     
     _mainTableView = ({
-        UITableView *view = [UITableView new];
+        UITableView *view = [[UITableView alloc] initWithFrame:CGRectMake(0.f, 20.f, kScreenWidth, kScreenHeight-20.f)];
         view.backgroundColor = [UIColor clearColor];
         [self.view addSubview:view];
-        [view mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.top.mas_equalTo(self.mas_topLayoutGuideBottom);
-            make.left.right.and.bottom.equalTo(self.view);
-        }];
-        view.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, kScreenWidth, 200.f)];
+        view.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0.f, 0.f, kScreenWidth, 200.f)];
         [view setDisableTableHeaderView:YES];
-        view.showsVerticalScrollIndicator= NO;
+        [view setShowsVerticalScrollIndicator:NO];
         view.dataSource = self;
         view.delegate = self;
         view.rowHeight = kMainTableViewRowHeight;
@@ -124,11 +115,11 @@ static const CGFloat kNavigationBarHeight = 56.f;
     
     _carouseView = ({
         CarouselView *view = [[CarouselView alloc] initWithFrame:CGRectMake(0.f, -((kScreenWidth-220.f)/2+20.f), kScreenWidth, kScreenWidth)];
-        [self.mainScrollView addSubview:view];
-        [view reloadDataWithStories:self.viewModel.top_stories];
+        [_mainScrollView addSubview:view];
         view.displayHeight = 220.f;
+        [view setStroies:self.viewModel.top_stories];
         view.tap = ^(NSIndexPath *indexPath){
-            NSString *storyID = [_carouseView.items[indexPath.item][@"id"] stringValue];
+            NSString *storyID = [_carouseView.stroies[indexPath.item][@"id"] stringValue];
             DetailStoryViewModel *dvm = [[DetailStoryViewModel alloc] initWithStoryID:storyID];
             dvm.allStoriesID = self.viewModel.allStoriesID;
             DetailStoryViewController *detailStoryVC = [[DetailStoryViewController alloc] initWithViewModel:dvm];
@@ -139,15 +130,10 @@ static const CGFloat kNavigationBarHeight = 56.f;
         };
         view;
     });
-    
+
     _navBarView = ({
-        CounterfeitNavBarView *view = [CounterfeitNavBarView new];
+        CounterfeitNavBarView *view = [[CounterfeitNavBarView alloc] initWithFrame:CGRectMake(0.f, 0.f, kScreenWidth, kNavigationBarHeight)];
         [self.view addSubview:view];
-        [view mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.left.top.and.right.equalTo(self.view);
-            make.height.mas_equalTo(kNavigationBarHeight);
-        }];
-        
         view.titleLab.attributedText = [[NSAttributedString alloc] initWithString:@"今日新闻" attributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize:18],NSForegroundColorAttributeName:[UIColor whiteColor]}];
         [view.leftBtn setImage:[UIImage imageNamed:@"Home_Icon"] forState:UIControlStateNormal];
         [view.leftBtn setImage:[UIImage imageNamed:@"Home_Icon_Highlight"] forState:UIControlStateHighlighted];
@@ -172,7 +158,7 @@ static const CGFloat kNavigationBarHeight = 56.f;
 }
 
 - (void)mainScrollViewToTop:(NSNotification *)noti {
-    [_mainTableView setContentOffset:CGPointZero animated:NO];
+    [_mainTableView setContentOffset:CGPointZero animated:YES];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -186,13 +172,18 @@ static const CGFloat kNavigationBarHeight = 56.f;
         UITableViewCell *cell = [_mainTableView cellForRowAtIndexPath:indexPath];
         StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
         if (!vm.displayImage) {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                [vm loadDisplayImage];
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                [vm dowmloadImage];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    cell.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
-                    [vm relesaeInvalidObjects];
+                    if (vm.visiable) {
+                        cell.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
+                    }
                 });
             });
+        }else {
+            if (vm.visiable) {
+                cell.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
+            }
         }
     }
 }
@@ -209,7 +200,6 @@ static const CGFloat kNavigationBarHeight = 56.f;
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     [self updateContentOfScreenVisibleRows];
 }
-
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     CGFloat offSetY = scrollView.contentOffset.y;
@@ -242,7 +232,7 @@ static const CGFloat kNavigationBarHeight = 56.f;
         }
     }
     
-    if (offSetY + _mainTableView.height + 1.5*kMainTableViewRowHeight > _mainTableView.contentSize.height && !self.viewModel.isLoading) {
+    if (offSetY + _mainTableView.height + 2*kMainTableViewRowHeight > _mainTableView.contentSize.height && !self.viewModel.isLoading) {
         [self.viewModel getPreviousStories];
     }
 }
@@ -262,18 +252,18 @@ static const CGFloat kNavigationBarHeight = 56.f;
     StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
     if (vm.displayImage) {
         cell.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
-    }else{
+        [vm relesaeInvalidObjects];
+    }else {
         if (!tableView.dragging&&!tableView.decelerating) {
-            [vm loadDisplayImage];
+            [vm dowmloadImage];
             cell.layer.contents = (__bridge id _Nullable)vm.displayImage.CGImage;
-            [vm relesaeInvalidObjects];
-
+            
         }else {
             cell.layer.contents = (__bridge id _Nullable)(vm.preImage.CGImage);
         }
     }
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.layer.contentsScale = [UIScreen mainScreen].scale;
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
 
@@ -332,6 +322,16 @@ static const CGFloat kNavigationBarHeight = 56.f;
         self.navBarView.titleLab.alpha = 0.f;
     }
 
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
+    vm.visiable = YES;
+}
+
+- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
+    vm.visiable = NO;
 }
 
 @end

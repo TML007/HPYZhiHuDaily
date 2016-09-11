@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HomePageViewModel.h"
 
 @interface HomeViewController : BaseViewController
+
+- (instancetype)initWithHomePageViewModel:(HomePageViewModel *)viewmodel;
 
 @end

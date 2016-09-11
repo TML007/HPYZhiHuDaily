@@ -55,21 +55,24 @@ static const CGFloat kNormalImageH = 75.f;
     return _preImage;
 }
 
-- (void)loadDisplayImage {
-    UIImage* image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:story.images[0]]]];
-    UIGraphicsBeginImageContextWithOptions(CGSizeMake(kScreenWidth, kMainTableViewRowHeight), NO, 0);
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextAddRect(context, CGRectMake(kSpacing, kSpacing, kScreenWidth-kSpacing*2, kMainTableViewRowHeight-kSpacing*2));
-    CGContextClip(context);
-    [self.preImage drawInRect:CGRectMake(0, 0, kScreenWidth, kMainTableViewRowHeight)];
-    [image drawInRect:imageViewFrame];
-    if (story.multipic) {
-        UIImage *warnImage = [UIImage imageNamed:@"Home_Morepic"];
-        [warnImage drawInRect:CGRectMake(kScreenWidth-warnImage.size.width-kSpacing, kMainTableViewRowHeight-kSpacing-warnImage.size.height, warnImage.size.width, warnImage.size.height)];
+- (void)dowmloadImage {
+    if (!_displayImage) {
+        UIImage* image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:story.images[0]]]];
+        UIGraphicsBeginImageContextWithOptions(CGSizeMake(kScreenWidth, kMainTableViewRowHeight), NO, 0);
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        CGContextAddRect(context, CGRectMake(kSpacing, kSpacing, kScreenWidth-kSpacing*2, kMainTableViewRowHeight-kSpacing*2));
+        CGContextClip(context);
+        [image drawInRect:imageViewFrame];
+        [title drawInRect:titleLabFrame];
+        if (story.multipic) {
+            UIImage *warnImage = [UIImage imageNamed:@"Home_Morepic"];
+            [warnImage drawInRect:CGRectMake(kScreenWidth-warnImage.size.width-kSpacing, kMainTableViewRowHeight-kSpacing-warnImage.size.height, warnImage.size.width, warnImage.size.height)];
+        }
+        _displayImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
     }
-    _displayImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();    
 }
+
 
 - (void)relesaeInvalidObjects {
     _preImage = nil;

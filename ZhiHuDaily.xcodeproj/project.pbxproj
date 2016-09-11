@@ -295,12 +295,12 @@
 		862DD68B1C5F38B200E24C6B /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				E007C6671D687DD8008E5698 /* news_qa.min.css */,
 				862DD68E1C5F38B200E24C6B /* AppDelegate.h */,
 				862DD68F1C5F38B200E24C6B /* AppDelegate.m */,
 				862DD6991C5F38B200E24C6B /* LaunchScreen.storyboard */,
 				862DD69C1C5F38B200E24C6B /* Info.plist */,
 				86B5FAD01C5F4B8100B7C66D /* ZhiHuDaily.pch */,
+				E007C6671D687DD8008E5698 /* news_qa.min.css */,
 				862DD68C1C5F38B200E24C6B /* main.m */,
 			);
 			name = "Supporting Files";

@@ -12,10 +12,8 @@ typedef void(^tapBlock)(NSIndexPath *);
 
 @interface CarouselView : UIView
 
-@property (strong,nonatomic)NSArray *items;
+@property (strong,nonatomic)NSArray *stroies;
 @property (strong,nonatomic)tapBlock tap;
 @property (assign,nonatomic)CGFloat displayHeight;
-
-- (void)reloadDataWithStories:(NSArray *)stories;
 
 @end

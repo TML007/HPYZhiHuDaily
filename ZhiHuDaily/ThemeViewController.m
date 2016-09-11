@@ -119,17 +119,17 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
     StoryCellViewModel *vm = [self.viewModel cellViewModelAtIndexPath:indexPath];
     
     if (vm.displayImage) {
-        cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
+        cell.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
     }else{
         if (!tableView.dragging&&!tableView.decelerating) {
-            [vm loadDisplayImage];
-            cell.contentView.layer.contents = (__bridge id _Nullable)vm.displayImage.CGImage;
-            
+            [vm dowmloadImage];
+            cell.layer.contents = (__bridge id _Nullable)vm.displayImage.CGImage;
         }else {
-            cell.contentView.layer.contents = (__bridge id _Nullable)(vm.preImage.CGImage);
+            cell.layer.contents = (__bridge id _Nullable)(vm.preImage.CGImage);
         }
     }
-    cell.contentView.layer.contentsScale = [UIScreen mainScreen].scale;
+    cell.layer.contentsScale = [UIScreen mainScreen].scale;
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     return cell;
 }
@@ -141,11 +141,13 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
         StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
         if (!vm.displayImage) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                [vm loadDisplayImage];
+                [vm dowmloadImage];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    cell.contentView.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
+                    cell.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
                 });
             });
+        }else {
+            cell.layer.contents = (__bridge id _Nullable)(vm.displayImage.CGImage);
         }
     }
 }
@@ -162,7 +164,6 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     [self updateContentOfScreenVisibleRows];
 }
-
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     CGFloat offSetY = scrollView.contentOffset.y;
@@ -210,7 +211,7 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     
     if ([keyPath isEqualToString:@"sectionViewModels"]) {
-        [_mainTableView insertSections:[NSIndexSet indexSetWithIndex:self.viewModel.sectionViewModels.count-1] withRowAnimation:UITableViewRowAnimationNone];
+        [_mainTableView reloadData];
     }
 
 }

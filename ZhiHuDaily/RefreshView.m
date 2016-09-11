@@ -49,19 +49,17 @@
 
 
 - (void)redrawFromProgress:(CGFloat)progress {
-    if (!_refresh) {
-        if (progress > 0.05) {
-            _whiteCircleLayer.opacity = 1.f;
-            _grayCircleLayer.opacity = 1.f;
-        }else {
-            _whiteCircleLayer.opacity = 0.f;
-            _grayCircleLayer.opacity = 0.f;
-        }
-        _whiteCircleLayer.strokeEnd = progress;
+    if (_refresh) return;
+    
+    if (progress > 0.05) {
+        _whiteCircleLayer.opacity = 1.f;
+        _grayCircleLayer.opacity = 1.f;
     }else {
         _whiteCircleLayer.opacity = 0.f;
         _grayCircleLayer.opacity = 0.f;
     }
+    _whiteCircleLayer.strokeEnd = progress;
+ 
 }
 
 - (void)setRefresh:(BOOL)refresh {
