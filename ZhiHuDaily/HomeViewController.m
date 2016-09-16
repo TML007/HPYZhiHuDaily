@@ -58,23 +58,23 @@ static const CGFloat kNavigationBarHeight = 56.f;
    
     if ([object isEqual:self.viewModel]) {
         if ([keyPath isEqualToString:@"sectionViewModels"]) {
-            NSUInteger kind = [change[NSKeyValueChangeKindKey] integerValue];
-            switch (kind) {
-                case NSKeyValueChangeSetting:
-                    [_mainTableView reloadData];
-                    break;
-                case NSKeyValueChangeInsertion:
-                    [_mainTableView insertSections:[NSIndexSet indexSetWithIndex:self.viewModel.sectionViewModels.count-1] withRowAnimation:UITableViewRowAnimationFade];
-                    break;
-                case NSKeyValueChangeReplacement:
-                    [_mainTableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-                    break;
-            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSUInteger kind = [change[NSKeyValueChangeKindKey] integerValue];
+                switch (kind) {
+                    case NSKeyValueChangeSetting:
+                        [_mainTableView reloadData];
+                        break;
+                    case NSKeyValueChangeInsertion:
+                        [_mainTableView insertSections:[NSIndexSet indexSetWithIndex:self.viewModel.sectionViewModels.count-1] withRowAnimation:UITableViewRowAnimationFade];
+                        break;
+                    case NSKeyValueChangeReplacement:
+                        [_mainTableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+                        break;
+                }
+            });
         }
         if ([keyPath isEqualToString:@"top_stories"]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.carouseView setStroies:self.viewModel.top_stories];
-            });
+            [self.carouseView performSelectorOnMainThread:@selector(setStroies:) withObject:self.viewModel.top_stories waitUntilDone:NO];
         }
     }
 }

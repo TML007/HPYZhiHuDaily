@@ -63,6 +63,16 @@
     self.pageControl.currentPage = 0;
     self.timer = [NSTimer scheduledTimerWithTimeInterval:10.f target:self selector:@selector(nextItem) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        for (NSDictionary* story in self.stroies) {;
+            NSString *imageUrlString = story[@"image"];
+            UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageUrlString]]];
+            [_imageCached setObject:image forKey:imageUrlString];
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.collectionView reloadData];
+        });
+    });
 
 }
 
@@ -119,8 +129,7 @@
     NSString *imageUrlString = story[@"image"];
     UIImage *image = [_imageCached objectForKey:imageUrlString];
     if (!image) {
-        image =[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageUrlString]]];
-        [_imageCached setObject:image forKey:imageUrlString];
+        image = [UIImage imageNamed:@"Home_Image"];
     }
     cell.imageView.image = image;
 

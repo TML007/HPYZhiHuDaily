@@ -7,7 +7,6 @@
 //
 
 #import "ThemeViewController.h"
-#import "ThemeViewModel.h"
 #import "StoryCellViewModel.h"
 #import "TDStoryViewModel.h"
 #import "TPStoryViewController.h"
@@ -25,22 +24,21 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
 
 @implementation ThemeViewController
 
-- (instancetype)init {
+- (instancetype)initWithViewModel:(ThemeViewModel *)viewModel {
     self = [super init];
     if (self) {
-        self.viewModel = [ThemeViewModel new];
+        self.viewModel = viewModel;
+        [self initSubViews];
+        [self configAllObservers];
+        [viewModel getDailyThemesData];
     }
     return self;
 }
-
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.automaticallyAdjustsScrollViewInsets = NO;
-    [self initSubViews];
-    [self configAllObservers];
-    [self.viewModel getDailyThemesDataWithThemeID:self.themeID];
 }
 
 - (void)initSubViews {
@@ -193,11 +191,17 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
 
 - (void)configAllObservers {
     [self.viewModel addObserver:self forKeyPath:@"sectionViewModels" options:NSKeyValueObservingOptionNew context:nil];
-    RAC(self,title) = RACObserve(self.viewModel, name);
-    [RACObserve(self.viewModel, imageURLStr) subscribeNext:^(id x) {
-        self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:x]]];
-    }];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(update:) name:@"getThemeDataSuccss" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mainScrollViewToTop:) name:@"TapStatusBar" object:nil];
+}
+
+- (void)update:(NSNotification *)noti {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.title = _viewModel.name;
+        self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:_viewModel.imageURLStr]]];
+        [_mainTableView reloadData];
+        
+    });
 }
 
 - (void)mainScrollViewToTop:(NSNotification *)noti {

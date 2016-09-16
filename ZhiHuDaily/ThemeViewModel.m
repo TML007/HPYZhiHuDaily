@@ -12,14 +12,6 @@
 
 @implementation ThemeViewModel
 
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        _loadQueue = [[NSOperationQueue alloc] init];
-        _progress = [NSMutableDictionary dictionary];
-    }
-    return self;
-}
 
 - (NSUInteger)numberOfSections {
     return self.sectionViewModels.count;
@@ -35,9 +27,9 @@
     return cellvms[indexPath.row];
 }
 
-- (void)getDailyThemesDataWithThemeID:(NSString *)themeID {
-    _themeID = themeID;
-    [NetOperation getRequestWithURL:[NSString stringWithFormat:@"theme/%@",themeID] parameters:nil success:^(id responseObject) {
+- (void)getDailyThemesData{
+    _sectionViewModels = @[].mutableCopy;
+    [NetOperation getRequestWithURL:[NSString stringWithFormat:@"theme/%@",_themeID] parameters:nil success:^(id responseObject) {
         
         NSDictionary *jsonDic = (NSDictionary *)responseObject;
         NSArray *storiesArr = jsonDic[@"stories"];
@@ -46,12 +38,17 @@
             StoryCellViewModel *vm = [[StoryCellViewModel alloc] initWithDictionary:dic];
             [tempArr addObject:vm];
         }
-        [self setValue:jsonDic[@"name"] forKey:@"name"];
-        [self setValue:@[tempArr] forKey:@"sectionViewModels"];
+//        [self setValue:jsonDic[@"name"] forKey:@"name"];
+//        [self setValue:@[tempArr] forKey:@"sectionViewModels"];
+//        _allStoriesID = [NSMutableArray arrayWithArray:[tempArr valueForKey:@"storyID"]];
+//        [self setValue:jsonDic[@"background"] forKey:@"imageURLStr"];
+//        [self setValue:jsonDic[@"editors"] forKey:@"editors"];
+        self.name = jsonDic[@"name"];
+        [self.sectionViewModels addObject:tempArr];
         _allStoriesID = [NSMutableArray arrayWithArray:[tempArr valueForKey:@"storyID"]];
-        [self setValue:jsonDic[@"background"] forKey:@"imageURLStr"];
-        [self setValue:jsonDic[@"name"] forKey:@"name"];
-        [self setValue:jsonDic[@"editors"] forKey:@"editors"];
+        self.imageURLStr = jsonDic[@"background"];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"getThemeDataSuccss" object:nil userInfo:nil];
         
     } failure:^(NSError *error) {
         

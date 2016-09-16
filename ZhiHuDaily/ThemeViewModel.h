@@ -18,10 +18,8 @@
 @property (strong,nonatomic)NSString *imageURLStr;
 @property (strong,nonatomic)NSString *name;
 @property (strong,nonatomic)NSArray *editors;
-@property(strong,nonatomic)NSOperationQueue *loadQueue;
-@property (strong,nonatomic)NSMutableDictionary *progress;
 
-- (void)getDailyThemesDataWithThemeID:(NSString *)themeID;
+- (void)getDailyThemesData;
 - (void)getMoreDailyThemesData;
 
 - (NSUInteger)numberOfSections;

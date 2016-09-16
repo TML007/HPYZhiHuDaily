@@ -7,9 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ThemeViewModel.h"
 
 @interface ThemeViewController : BaseViewController
 
 @property (strong,nonatomic)NSString *themeID;
+
+- (instancetype)initWithViewModel:(ThemeViewModel *)viewModel;
 
 @end

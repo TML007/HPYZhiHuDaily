@@ -59,7 +59,7 @@
             MenuItem *model = [[MenuItem alloc] initWithDictionary:dic];
             [_menuItems addObject:model];
         }
-        [_mainTableView reloadData];
+        [_mainTableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
     } failure:^(NSError *error) {
         
     }];
@@ -91,8 +91,9 @@
         [mainVC showHomeView];
     }else {
         MenuItem *item = [_menuItems objectAtIndex:indexPath.row];
-        ThemeViewController *themeVC = [ThemeViewController new];
-        themeVC.themeID = item.themeID;
+        ThemeViewModel *tvm = [ThemeViewModel new];
+        tvm.themeID = item.themeID;
+        ThemeViewController *themeVC = [[ThemeViewController alloc] initWithViewModel:tvm];
         UINavigationController *subNavC = [[UINavigationController alloc] initWithRootViewController:themeVC];
         subNavC.transitioningDelegate = (MainViewController *) self.view.window.rootViewController;
         [self.view.window.rootViewController presentViewController:subNavC animated:YES completion:nil];

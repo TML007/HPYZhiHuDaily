@@ -18,8 +18,8 @@
  
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [UIStoryboard storyboardWithName:@"LaunchStoryboard" bundle:[NSBundle mainBundle]].instantiateInitialViewController;
-    [self initMainViewController];
     [self.window makeKeyAndVisible];
+    [self initMainViewController];
 
     return YES;
 }
@@ -30,6 +30,7 @@
     HomeViewController *homeVC = [[HomeViewController alloc] initWithHomePageViewModel:viewModel];
     LeftMenuViewController *leftMenuVC = [[LeftMenuViewController alloc] initWithNibName:@"LeftMenuViewController" bundle:[NSBundle mainBundle]];
     leftMenuVC.view.frame = kScreenBounds;
+    
     _mainViewController = [[MainViewController alloc]initWithLeftMenuViewController:leftMenuVC andHomeViewController:homeVC];
 }
 

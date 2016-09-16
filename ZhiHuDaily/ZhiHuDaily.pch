@@ -19,7 +19,6 @@
 #import <Masonry/Masonry.h>
 #import <AFNetworking/AFNetworking.h>
 #import <JSONModel/JSONModel.h>
-#import <ReactiveCocoa/ReactiveCocoa.h>
 
 #define kScreenWidth  [UIScreen mainScreen].bounds.size.width
 #define kScreenHeight [UIScreen mainScreen].bounds.size.height
