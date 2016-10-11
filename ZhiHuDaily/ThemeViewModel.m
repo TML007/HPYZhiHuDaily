@@ -38,11 +38,6 @@
             StoryCellViewModel *vm = [[StoryCellViewModel alloc] initWithDictionary:dic];
             [tempArr addObject:vm];
         }
-//        [self setValue:jsonDic[@"name"] forKey:@"name"];
-//        [self setValue:@[tempArr] forKey:@"sectionViewModels"];
-//        _allStoriesID = [NSMutableArray arrayWithArray:[tempArr valueForKey:@"storyID"]];
-//        [self setValue:jsonDic[@"background"] forKey:@"imageURLStr"];
-//        [self setValue:jsonDic[@"editors"] forKey:@"editors"];
         self.name = jsonDic[@"name"];
         [self.sectionViewModels addObject:tempArr];
         _allStoriesID = [NSMutableArray arrayWithArray:[tempArr valueForKey:@"storyID"]];
@@ -57,7 +52,7 @@
 
 
 - (void)getMoreDailyThemesData {
-    _isLoading = YES;
+    if (_isLoading) return;
     [NetOperation getRequestWithURL:[NSString stringWithFormat:@"theme/%@/before/%@",_themeID,[_allStoriesID lastObject]] parameters:nil success:^(id responseObject) {
         NSDictionary *jsonDic = (NSDictionary *)responseObject;
         NSArray *storiesArr = jsonDic[@"stories"];

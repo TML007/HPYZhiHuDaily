@@ -130,7 +130,7 @@
 
 - (void)getPreviousStories {
     
-    _isLoading = YES;
+    if (_isLoading) return;
     [NetOperation getRequestWithURL:[NSString stringWithFormat:@"stories/before/%@",self.currentLoadDayStr] parameters:nil success:^(id responseObject) {
         NSDictionary *jsonDic = (NSDictionary *)responseObject;
         self.currentLoadDayStr = responseObject[@"date"];

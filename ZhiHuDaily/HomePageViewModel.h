@@ -13,7 +13,7 @@
 
 @property(strong,readonly,nonatomic)NSMutableArray *sectionViewModels;
 @property(strong,readonly,nonatomic)NSMutableArray *top_stories;
-@property(assign,readonly,nonatomic)BOOL isLoading;
+@property(assign,nonatomic)BOOL isLoading;
 @property(strong,readonly,nonatomic)NSMutableArray *allStoriesID;
 @property(strong,nonatomic)NSString *currentLoadDayStr; //已加载最靠前那一天的日期字符串
 

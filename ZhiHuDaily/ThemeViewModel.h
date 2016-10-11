@@ -14,7 +14,7 @@
 @property (strong,nonatomic)NSString *themeID;
 @property (strong,nonatomic)NSMutableArray *sectionViewModels;
 @property (strong,nonatomic)NSMutableArray *allStoriesID;
-@property(assign,readonly,nonatomic)BOOL isLoading;
+@property(assign,nonatomic)BOOL isLoading;
 @property (strong,nonatomic)NSString *imageURLStr;
 @property (strong,nonatomic)NSString *name;
 @property (strong,nonatomic)NSArray *editors;

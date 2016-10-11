@@ -180,6 +180,15 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
 }
 
 
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
+    if ([[_viewModel.allStoriesID lastObject] isEqualToString:vm.storyID]) {
+        [self.viewModel getMoreDailyThemesData];
+        self.viewModel.isLoading = YES;
+    }
+}
+
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     StoryCellViewModel *svm = [self.viewModel cellViewModelAtIndexPath:indexPath];
     TDStoryViewModel *tdvm = [[TDStoryViewModel alloc] initWithStoryID:svm.storyID];

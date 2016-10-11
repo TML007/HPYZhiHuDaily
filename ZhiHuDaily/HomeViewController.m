@@ -231,10 +231,6 @@ static const CGFloat kNavigationBarHeight = 56.f;
             });
         }
     }
-    
-    if (offSetY + _mainTableView.height + 2*kMainTableViewRowHeight > _mainTableView.contentSize.height && !self.viewModel.isLoading) {
-        [self.viewModel getPreviousStories];
-    }
 }
 
 #pragma mark - UITableViewDataSource
@@ -327,6 +323,10 @@ static const CGFloat kNavigationBarHeight = 56.f;
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     StoryCellViewModel *vm = [_viewModel cellViewModelAtIndexPath:indexPath];
     vm.visiable = YES;
+    if ([[_viewModel.allStoriesID lastObject] isEqualToString:vm.storyID]) {
+        [self.viewModel getPreviousStories];
+        self.viewModel.isLoading = YES;
+    }
 }
 
 - (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
