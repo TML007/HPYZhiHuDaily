@@ -6,17 +6,23 @@ iOS 9.0以上
 * AFNetworking
 * Masonry
 * JSONModel
+
 ## 运行效果
 ![effect](https://github.com/hshpy/HPYZhiHuDaily/blob/master/effect.gif)
-## 部分实现过程
+
+## 部分实现过程  
+
 ### 首页
-轮播视图里有一层渐变图层，当把CAGradientLayer的实例当做子图层加入的时，在我们下拉刷新时会触发景深效果会改变图层的bounds属性(动画属性)，动画效果造成与我们下拉时不一致，苹果只对子图层的动画属性改变自动会触发隐式动画；既然添加子图层没办法，那就往根图层想办法了，每个UIView的实例都一个CALayer的实例作为根图层，所以新建一个CoverView继承UIView重写下面方法，这样CoverView的实例的根图层就是CAGradientLayer了，改变bounds也不会触发隐式动画。
+
+轮播视图里有一层渐变图层，当把CAGradientLayer的实例当做子图层加入的时，在我们下拉刷新时会触发景深效果会改变图层的bounds属性(动画属性)，动画效果造成与我们下拉时不一致，苹果只对子图层的动画属性改变自动会触发隐式动画；既然添加子图层没办法，那就往根图层想办法了，每个UIView的实例都一个CALayer的实例作为根图层，所以新建一个CoverView继承UIView重写下面方法，这样CoverView的实例的根图层就是CAGradientLayer了，改变bounds也不会触发隐式动画。  
+
 	+ (Class)layerClass {
 	    return [CAGradientLayer class];
 	}
 ***
 
-为了配合实现景深效果，UITableView加入了一个透明的tableHeaderView，这样导致了后面轮播视图的事件响应都失效了，hitTest视图都是tableview，所以给UITableview写个category添加了个disableTableHeaderView属性来判断是否响应tableviewHeaderView的事件。
+为了配合实现景深效果，UITableView加入了一个透明的tableHeaderView，这样导致了后面轮播视图的事件响应都失效了，hitTest视图都是tableview，所以给UITableview写个category添加了个disableTableHeaderView属性来判断是否响应tableviewHeaderView的事件。  
+
 	- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
 	   if (self.disableTableHeaderView) {
 	       CGRect frame = self.tableHeaderView.frame;
