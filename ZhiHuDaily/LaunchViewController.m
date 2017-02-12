@@ -40,9 +40,10 @@
         CGFloat scale = [UIScreen mainScreen].scale;
         NSInteger imageWidth = [@(kScreenWidth * scale) integerValue];
         NSInteger imageHeight = [@(kScreenHeight * scale) integerValue];
-        [NetOperation getRequestWithURL:[NSString stringWithFormat:@"start-image/%ld*%ld",(long)imageWidth,(long)imageHeight] parameters:nil success:^(id responseObject) {
-            NSString *text = responseObject[@"text"];
-            NSString *urlString = responseObject[@"img"];
+        [NetOperation getRequestWithURL:[NSString stringWithFormat:@"prefetch-launch-images/%ld*%ld",(long)imageWidth,(long)imageHeight] parameters:nil success:^(id responseObject) {
+            NSDictionary *dicData = [responseObject[@"creatives"] firstObject];
+            NSString *text = dicData[@"text"];
+            NSString *urlString = dicData[@"url"];
             NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]];
             dispatch_async(dispatch_get_main_queue(), ^{
                 _titleLab.text = text;
@@ -67,11 +68,12 @@
         CGFloat scale = [UIScreen mainScreen].scale;
         NSInteger imageWidth = [@(kScreenWidth * scale) integerValue];
         NSInteger imageHeight = [@(kScreenHeight * scale) integerValue];
-        [NetOperation getRequestWithURL:[NSString stringWithFormat:@"start-image/%ld*%ld",(long)imageWidth,(long)imageHeight] parameters:nil success:^(id responseObject) {
+        [NetOperation getRequestWithURL:[NSString stringWithFormat:@"prefetch-launch-images/%ld*%ld",(long)imageWidth,(long)imageHeight] parameters:nil success:^(id responseObject) {
             NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
-            NSString *urlString = responseObject[@"img"];
+            NSDictionary *dicData = [responseObject[@"creatives"] firstObject];
+            NSString *urlString = dicData[@"url"];
             if (![urlString isEqualToString:[userDefault stringForKey:@"LaunchImageUrlString"]]) {
-                NSString *text = responseObject[@"text"];
+                NSString *text = dicData[@"text"];
                 NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]];
                 [userDefault setObject:text forKey:@"LaunchText"];
                 [userDefault setObject:imageData forKey:@"LaunchImageData"];

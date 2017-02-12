@@ -24,6 +24,6 @@
 #define kScreenHeight [UIScreen mainScreen].bounds.size.height
 #define kScreenBounds [UIScreen mainScreen].bounds
 
-#define kBaseURL @"http://news-at.zhihu.com/api/4"
+#define kBaseURL @"https://news-at.zhihu.com/api/7/"
 
 #endif /* ZhiHuDaily_pch */

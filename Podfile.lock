@@ -14,7 +14,7 @@ PODS:
   - AFNetworking/Serialization (3.0.4)
   - AFNetworking/UIKit (3.0.4):
     - AFNetworking/NSURLSession
-  - JSONModel (1.5.1)
+  - JSONModel (1.7.0)
   - Masonry (1.0.2)
 
 DEPENDENCIES:
@@ -24,7 +24,7 @@ DEPENDENCIES:
 
 SPEC CHECKSUMS:
   AFNetworking: a0075feb321559dc78d9d85b55d11caa19eabb93
-  JSONModel: fd2553dc9e6608a3f35bfc956a14be35395d3852
+  JSONModel: 840bc0fcffb24b8454d2c026bf26fea454b8e98d
   Masonry: 7c429b56da9d4ee0bbb3ed77a5ea710d6a5df39e
 
 PODFILE CHECKSUM: 9e59370ed2ce5cb59308a6a5efd9c1779a4da9f9
