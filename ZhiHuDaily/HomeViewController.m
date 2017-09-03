@@ -37,8 +37,9 @@ static const CGFloat kNavigationBarHeight = 56.f;
     self = [super init];
     if (self) {
         self.viewModel = viewmodel;
-        [self initSubViews];
         [self configAllObservers];
+        [self.viewModel getLatestStories];
+        
     }
     return self;
 }
@@ -87,6 +88,8 @@ static const CGFloat kNavigationBarHeight = 56.f;
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [self initSubViews];
+
 }
 
 
@@ -192,7 +195,7 @@ static const CGFloat kNavigationBarHeight = 56.f;
 
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-    if (!decelerate) {
+    if (!decelerate&&!scrollView.scrollsToTop) {
         [self updateContentOfScreenVisibleRows];
     }
 }

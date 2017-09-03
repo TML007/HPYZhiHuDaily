@@ -21,49 +21,47 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [self setData];
+}
+
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
     [self showAnimation];
 }
 
-- (void)showAnimation {
+- (void)setData {
+    
     NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
     if ([userDefault dataForKey:@"LaunchImageData"]) {
         _imageView.image = [UIImage imageWithData:[userDefault dataForKey:@"LaunchImageData"]];
         _titleLab.text = [userDefault stringForKey:@"LaunchText"];
-        [UIView animateWithDuration:1.f delay:0 options:UIViewAnimationOptionCurveLinear animations:^{
-            _launchView.alpha = 0.f;
-            _imageView.transform = CGAffineTransformMakeScale(1.1, 1.1);
-        } completion:^(BOOL finished) {
-            self.view.window.rootViewController = ((AppDelegate *)[UIApplication sharedApplication].delegate).mainViewController;
-            [self backgroundThreadUpdateLaunchData];
-        }];
     }else {
-        CGFloat scale = [UIScreen mainScreen].scale;
-        NSInteger imageWidth = [@(kScreenWidth * scale) integerValue];
-        NSInteger imageHeight = [@(kScreenHeight * scale) integerValue];
-        [NetOperation getRequestWithURL:[NSString stringWithFormat:@"prefetch-launch-images/%ld*%ld",(long)imageWidth,(long)imageHeight] parameters:nil success:^(id responseObject) {
-            NSDictionary *dicData = [responseObject[@"creatives"] firstObject];
-            NSString *text = dicData[@"text"];
-            NSString *urlString = dicData[@"url"];
-            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                _titleLab.text = text;
-                _imageView.image = [UIImage imageWithData:imageData];
-                [UIView animateWithDuration:1.f delay:0 options:UIViewAnimationOptionCurveLinear animations:^{
-                    _launchView.alpha = 0.f;
-                    _imageView.transform = CGAffineTransformMakeScale(1.1, 1.1);
-                } completion:^(BOOL finished) {
-                    self.view.window.rootViewController = ((AppDelegate *)[UIApplication sharedApplication].delegate).mainViewController;
-                }];
-            });
-            NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
-            [userDefault setObject:text forKey:@"LaunchText"];
-            [userDefault setObject:urlString forKey:@"LaunchImageUrlString"];
-            [userDefault setObject:imageData forKey:@"LaunchImageData"];
-        } failure:nil];
+        UIImage *image = [UIImage imageNamed:@"Splash_Image"];
+        _imageView.image = image;
+        [userDefault setObject:@"" forKey:@"LaunchText"];
+        [userDefault setObject:@"" forKey:@"LaunchImageUrlString"];
+        [userDefault setObject:UIImagePNGRepresentation(image) forKey:@"LaunchImageData"];
     }
+
 }
 
-- (void)backgroundThreadUpdateLaunchData {
+- (void)showAnimation {
+    
+    [UIView animateWithDuration:1.2f delay:0 options:UIViewAnimationOptionCurveLinear animations:^{
+        _launchView.alpha = 0.1f;
+        _imageView.transform = CGAffineTransformMakeScale(1.1, 1.1);
+        
+    } completion:^(BOOL finished) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            self.view.window.rootViewController = ((AppDelegate *)[UIApplication sharedApplication].delegate).mainViewController;
+        });
+        [self backgroundThreadUpdateLaunchImage];
+    }];
+}
+
+- (void)backgroundThreadUpdateLaunchImage {
+
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         CGFloat scale = [UIScreen mainScreen].scale;
         NSInteger imageWidth = [@(kScreenWidth * scale) integerValue];
@@ -72,13 +70,12 @@
             NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
             NSDictionary *dicData = [responseObject[@"creatives"] firstObject];
             NSString *urlString = dicData[@"url"];
-            if (![urlString isEqualToString:[userDefault stringForKey:@"LaunchImageUrlString"]]) {
+            if (!urlString && ![urlString isEqualToString:[userDefault stringForKey:@"LaunchImageUrlString"]]) {
                 NSString *text = dicData[@"text"];
                 NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]];
                 [userDefault setObject:text forKey:@"LaunchText"];
                 [userDefault setObject:imageData forKey:@"LaunchImageData"];
                 [userDefault setObject:urlString forKey:@"LaunchImageUrlString"];
-                
             }
         } failure:nil];
     });

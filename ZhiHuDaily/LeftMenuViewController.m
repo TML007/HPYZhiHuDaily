@@ -27,6 +27,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    self.view.frame = kScreenBounds;
     self.view.backgroundColor = [UIColor darkGrayColor];
     _mainTableView.backgroundColor =[UIColor clearColor];
     _mainTableView.rowHeight = 44.f;
@@ -90,13 +91,17 @@
         MainViewController *mainVC = (MainViewController *)self.view.window.rootViewController;
         [mainVC showHomeView];
     }else {
+        
         MenuItem *item = [_menuItems objectAtIndex:indexPath.row];
         ThemeViewModel *tvm = [ThemeViewModel new];
         tvm.themeID = item.themeID;
         ThemeViewController *themeVC = [[ThemeViewController alloc] initWithViewModel:tvm];
         UINavigationController *subNavC = [[UINavigationController alloc] initWithRootViewController:themeVC];
         subNavC.transitioningDelegate = (MainViewController *) self.view.window.rootViewController;
-        [self.view.window.rootViewController presentViewController:subNavC animated:YES completion:nil];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self.view.window.rootViewController presentViewController:subNavC animated:YES completion:nil];
+        });
+        
     }
     [self.mainTableView deselectRowAtIndexPath:indexPath animated:NO];
 }

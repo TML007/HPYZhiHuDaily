@@ -24,7 +24,7 @@
 @property (assign,nonatomic)BOOL isLightContent;//状态栏风格
 
 @property (strong,nonatomic)UIButton *previousWarnbtn;
-@property (strong,nonatomic)UIView *placeHolderView;
+
 
 @end
 
@@ -35,6 +35,8 @@
     if (self) {
         self.isLightContent = YES;
         self.viewModel = vm;
+        [self configAllObservers];
+        [self.viewModel getStoryContentWithStoryID:self.viewModel.tagStroyID];
     }
     return self;
 }
@@ -43,8 +45,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self initSubViews];
-    [self configAllObservers];
-    [self.viewModel getStoryContentWithStoryID:self.viewModel.tagStroyID];
 }
 
 - (void)configAllObservers {
@@ -65,7 +65,7 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     if ([keyPath isEqualToString:@"detailStory"]) {
         _webView.height = _mainScrollView.height;
-        [self.view addSubview:_placeHolderView];
+        [_webView.scrollView setBackgroundColor:[UIColor whiteColor]];
         [self.webView loadHTMLString:self.viewModel.htmlStr baseURL:[[NSBundle mainBundle]bundleURL]];
         [self.headerView setHeaderContent:self.viewModel.imageURL title:self.viewModel.titleAttText imageSourceText:self.viewModel.imageSourceText];
     }
@@ -139,16 +139,10 @@
         WKWebView *view = [[WKWebView alloc] initWithFrame:CGRectMake(0, 200.f, kScreenWidth, self.mainScrollView.height-200.f) configuration:config];
         [self.mainScrollView addSubview:view];
         view.navigationDelegate = self;
-        [view setBackgroundColor:[UIColor clearColor]];
         [view.scrollView setScrollEnabled:NO];
-        [view.scrollView setBackgroundColor:[UIColor clearColor]];
         view;
     });
 
-    
-    _placeHolderView = [[UIView alloc] initWithFrame:CGRectMake(0, 220.f, kScreenWidth, self.view.height-220.f-43.f)];
-    _placeHolderView.backgroundColor = [UIColor whiteColor];
-    
     
     _previousWarnbtn = ({
         UIButton *btn = [UIButton new];
@@ -221,7 +215,7 @@
     [webView evaluateJavaScript:@"document.body.scrollHeight"completionHandler:^(id _Nullable data, NSError * _Nullable error) {
         _webView.height = [data floatValue];
         _mainScrollView.contentSize = CGSizeMake(kScreenWidth, _webView.height+200.f);
-        [_placeHolderView removeFromSuperview];
+        [_webView.scrollView setBackgroundColor:[UIColor clearColor]];
     }];
 }
 

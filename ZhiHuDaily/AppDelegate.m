@@ -19,18 +19,18 @@
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [UIStoryboard storyboardWithName:@"LaunchStoryboard" bundle:[NSBundle mainBundle]].instantiateInitialViewController;
     [self.window makeKeyAndVisible];
-    [self initMainViewController];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        [self initMainViewController];
+    });
 
     return YES;
 }
 
 - (void)initMainViewController {
-    HomePageViewModel *viewModel = [[HomePageViewModel alloc] init];
-    [viewModel getLatestStories];
-    HomeViewController *homeVC = [[HomeViewController alloc] initWithHomePageViewModel:viewModel];
-    LeftMenuViewController *leftMenuVC = [[LeftMenuViewController alloc] initWithNibName:@"LeftMenuViewController" bundle:[NSBundle mainBundle]];
-    leftMenuVC.view.frame = kScreenBounds;
     
+    HomeViewController *homeVC = [[HomeViewController alloc] initWithHomePageViewModel:[HomePageViewModel new]];
+    LeftMenuViewController *leftMenuVC = [[LeftMenuViewController alloc] initWithNibName:@"LeftMenuViewController" bundle:[NSBundle mainBundle]];
     _mainViewController = [[MainViewController alloc]initWithLeftMenuViewController:leftMenuVC andHomeViewController:homeVC];
 }
 

@@ -89,6 +89,7 @@
 //获取最新的新闻
 - (void)getLatestStories {
 
+    
     NSString *url = [kBaseURL stringByAppendingString:@"stories/latest"];
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]
                                                     cachePolicy: NSURLRequestReloadIgnoringCacheData
@@ -97,14 +98,8 @@
         [req setValue:lastestResquestEtag forHTTPHeaderField:@"If-None-Match"];
     }
   
-    //[req setValue:@"iPhone8,1/N71AP" forHTTPHeaderField:@"X-Device"];
     [req setValue:@"daily/201607251035 CFNetwork/808.2.16 Darwin/16.3.0" forHTTPHeaderField:@"User-Agent"];
     [req setValue:@"Bearer fZTTlAT2QvKUoWNVvLlZNA" forHTTPHeaderField:@"Authorization"];
-    //[req setValue:@"iOS 10.2" forHTTPHeaderField:@"X-OS"];
-    //[req setValue:@"com.zhihu.daily" forHTTPHeaderField:@"X-Bundle-ID"];
-    //[req setValue:@"7" forHTTPHeaderField:@"X-Api-Version"];
-    //[req setValue:@"2.6.7" forHTTPHeaderField:@"X-App-Version"];
-    //[req setValue:@"BD6B9BAF-4FB3-CB70-81E3-D2EAACCBB341" forHTTPHeaderField:@"X-UUID"];
 
     NSURLSessionTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;

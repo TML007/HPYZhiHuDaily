@@ -18,7 +18,6 @@
 		862DD68D1C5F38B200E24C6B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 862DD68C1C5F38B200E24C6B /* main.m */; };
 		862DD6901C5F38B200E24C6B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 862DD68F1C5F38B200E24C6B /* AppDelegate.m */; };
 		862DD6981C5F38B200E24C6B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 862DD6971C5F38B200E24C6B /* Assets.xcassets */; };
-		862DD69B1C5F38B200E24C6B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 862DD6991C5F38B200E24C6B /* LaunchScreen.storyboard */; };
 		862DD6A61C5F38B200E24C6B /* ZhiHuDailyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 862DD6A51C5F38B200E24C6B /* ZhiHuDailyTests.m */; };
 		862DD6B11C5F38B200E24C6B /* ZhiHuDailyUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 862DD6B01C5F38B200E24C6B /* ZhiHuDailyUITests.m */; };
 		8640ED5C1C8C3EF700679790 /* TPStoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8640ED5B1C8C3EF700679790 /* TPStoryViewController.m */; };
@@ -92,7 +91,6 @@
 		862DD68E1C5F38B200E24C6B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		862DD68F1C5F38B200E24C6B /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		862DD6971C5F38B200E24C6B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		862DD69A1C5F38B200E24C6B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		862DD69C1C5F38B200E24C6B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		862DD6A11C5F38B200E24C6B /* ZhiHuDailyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZhiHuDailyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		862DD6A51C5F38B200E24C6B /* ZhiHuDailyTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZhiHuDailyTests.m; sourceTree = "<group>"; };
@@ -297,7 +295,6 @@
 			children = (
 				862DD68E1C5F38B200E24C6B /* AppDelegate.h */,
 				862DD68F1C5F38B200E24C6B /* AppDelegate.m */,
-				862DD6991C5F38B200E24C6B /* LaunchScreen.storyboard */,
 				862DD69C1C5F38B200E24C6B /* Info.plist */,
 				86B5FAD01C5F4B8100B7C66D /* ZhiHuDaily.pch */,
 				E007C6671D687DD8008E5698 /* news_qa.min.css */,
@@ -653,7 +650,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8602EC541C8D2EDD006CE28B /* LaunchStoryboard.storyboard in Resources */,
-				862DD69B1C5F38B200E24C6B /* LaunchScreen.storyboard in Resources */,
 				86432F551C89802C0024634C /* LeftMenuViewController.xib in Resources */,
 				E007C6681D687DD8008E5698 /* news_qa.min.css in Resources */,
 				E048E1C11D6AFD700017E2B4 /* TopStoryCollectionViewCell.xib in Resources */,
@@ -720,7 +716,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -798,17 +794,6 @@
 			targetProxy = 862DD6AD1C5F38B200E24C6B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		862DD6991C5F38B200E24C6B /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				862DD69A1C5F38B200E24C6B /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		862DD6B31C5F38B200E24C6B /* Debug */ = {
@@ -912,6 +897,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -932,6 +918,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

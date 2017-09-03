@@ -29,9 +29,10 @@
 
 - (void)getDailyThemesData{
     _sectionViewModels = @[].mutableCopy;
-    [NetOperation getRequestWithURL:[NSString stringWithFormat:@"theme/%@",_themeID] parameters:nil success:^(id responseObject) {
-        
-        NSDictionary *jsonDic = (NSDictionary *)responseObject;
+    //dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+    NSURLSessionTask *task = [[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://news-at.zhihu.com/api/7/theme/%@",_themeID]] completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        //dispatch_semaphore_signal(sema);
+        NSDictionary *jsonDic = (NSDictionary *)[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];;
         NSArray *storiesArr = jsonDic[@"stories"];
         NSMutableArray* tempArr = [NSMutableArray array];
         for (NSDictionary *dic in storiesArr) {
@@ -42,12 +43,10 @@
         [self.sectionViewModels addObject:tempArr];
         _allStoriesID = [NSMutableArray arrayWithArray:[tempArr valueForKey:@"storyID"]];
         self.imageURLStr = jsonDic[@"background"];
-        
         [[NSNotificationCenter defaultCenter] postNotificationName:@"getThemeDataSuccss" object:nil userInfo:nil];
-        
-    } failure:^(NSError *error) {
-        
     }];
+    [task resume];
+    //dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
 }
 
 

@@ -28,7 +28,6 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
     self = [super init];
     if (self) {
         self.viewModel = viewModel;
-        [self initSubViews];
         [self configAllObservers];
         [viewModel getDailyThemesData];
     }
@@ -39,6 +38,8 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.automaticallyAdjustsScrollViewInsets = NO;
+    
+    [self initSubViews];
 }
 
 - (void)initSubViews {
@@ -94,6 +95,9 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize:18],NSForegroundColorAttributeName:[UIColor whiteColor]}];
     [self.navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
     [self.navigationController.navigationBar setShadowImage:[UIImage new]];
+    self.title = _viewModel.name;
+    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:_viewModel.imageURLStr]]];
+    [_mainTableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -207,8 +211,8 @@ static const CGFloat kMainTableViewRowHeight = 95.f;
 - (void)update:(NSNotification *)noti {
     dispatch_async(dispatch_get_main_queue(), ^{
         self.title = _viewModel.name;
-        self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:_viewModel.imageURLStr]]];
         [_mainTableView reloadData];
+        self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:_viewModel.imageURLStr]]];
         
     });
 }

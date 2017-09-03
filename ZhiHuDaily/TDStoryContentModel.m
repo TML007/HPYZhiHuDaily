@@ -11,7 +11,7 @@
 @implementation TDStoryContentModel
 
 + (JSONKeyMapper *)keyMapper {
-    return [[JSONKeyMapper alloc] initWithDictionary:@{@"id":@"storyID"}];
+    return [[JSONKeyMapper alloc] initWithModelToJSONDictionary:@{@"id":@"storyID"}];
 }
 
 + (BOOL)propertyIsOptional:(NSString *)propertyName {
